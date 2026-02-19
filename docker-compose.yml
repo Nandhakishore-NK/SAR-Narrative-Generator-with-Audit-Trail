@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  sar-app:
+    build: .
+    container_name: sar_narrative_generator
+    ports:
+      - "8501:8501"
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
+      - DATABASE_URL=sqlite:////app/data/sar_system.db
+      - CHROMA_PERSIST_DIR=/app/data/chroma_db
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-prod}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+    volumes:
+      - sar_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optionally add PostgreSQL for production
+  # postgres:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_DB: sar_db
+  #     POSTGRES_USER: sar_user
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sar_password}
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+volumes:
+  sar_data:
+  # pg_data:

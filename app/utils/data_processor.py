@@ -383,3 +383,32 @@ def get_alert_dict(alert: TransactionAlert) -> Dict:
         "alert_score": alert.alert_score,
         "triggering_factors": alert.triggering_factors
     }
+
+
+def format_inr(amount: float) -> str:
+    """Format amount in Indian number system with ₹ prefix.
+
+    Examples:
+        2_10_00_000  -> ₹2.10 Cr
+        98_50_000    -> ₹98.50 L
+        45_000       -> ₹45,000
+    """
+    if amount is None:
+        return "₹0"
+    amount = float(amount)
+    if amount >= 1_00_00_000:  # 1 crore
+        return f"₹{amount / 1_00_00_000:.2f} Cr"
+    elif amount >= 1_00_000:   # 1 lakh
+        return f"₹{amount / 1_00_000:.2f} L"
+    else:
+        # Indian comma formatting: last 3 digits, then groups of 2
+        s = str(int(amount))
+        if len(s) <= 3:
+            return f"₹{s}"
+        result = s[-3:]
+        s = s[:-3]
+        while len(s) > 2:
+            result = s[-2:] + "," + result
+            s = s[:-2]
+        result = (s + "," + result) if s else result
+        return f"₹{result}"

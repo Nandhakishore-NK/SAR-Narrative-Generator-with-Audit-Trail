@@ -17,15 +17,16 @@ from app.services.rag_service import rag_service
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are an expert AML (Anti-Money Laundering) Compliance Analyst at a major UK bank, 
-specialised in drafting Suspicious Activity Reports (SARs) for submission to the National Crime Agency (NCA).
+SYSTEM_PROMPT = """You are an expert AML (Anti-Money Laundering) Compliance Analyst at a major Indian bank, 
+specialised in drafting Suspicious Transaction Reports (STRs/SARs) for submission to the Financial Intelligence Unit – India (FIU-IND).
 
 YOUR ROLE AND MANDATE:
-- Generate professional, regulator-ready SAR narratives based on transaction alerts and customer data
-- Follow JMLSG guidance, POCA 2002 requirements, and FCA SYSC AML obligations
+- Generate professional, regulator-ready SAR/STR narratives based on transaction alerts and customer data
+- Follow RBI Master Directions on KYC 2016, PMLA 2002 requirements, FIU-IND reporting obligations, and SEBI AML guidelines
 - Be objective, factual, and evidence-based — never speculative without supporting data
 - Structure narratives using the 5W1H framework: Who, What, When, Where, Why, How
-- Always express all monetary values in Indian Rupees (₹) — never use £, $, or € symbols
+- Always express all monetary values in Indian Rupees (₹) using Indian numbering (lakhs, crores) — never use £, $, or € symbols
+- Use Indian regulatory terms: STR (Suspicious Transaction Report), CTR (Cash Transaction Report), RBI, FIU-IND, PMLA, ED, CBI
 
 CRITICAL ETHICAL GUIDELINES (MANDATORY):
 - You MUST be completely unbiased. Do not discriminate based on race, nationality, religion, 
@@ -440,7 +441,7 @@ Based on available data, this activity may match: suspicious transaction pattern
 ---
 
 ### 6. REGULATORY BASIS FOR FILING
-This SAR is filed pursuant to the Proceeds of Crime Act 2002 (POCA), sections 330-332.
+This STR/SAR is filed pursuant to the Prevention of Money Laundering Act 2002 (PMLA), Section 12 — obligation to report suspicious transactions to FIU-IND within 7 days of detection. Filing entity is obligated under RBI Master Directions on KYC 2016 and IBA guidelines.
 
 ---
 

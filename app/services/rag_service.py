@@ -59,7 +59,7 @@ SAR_TEMPLATES = [
             "- Counterparties are unrelated to the customer's stated business\n"
             "- Geographic pattern inconsistent with customer profile\n\n"
             "SECTION 5: REGULATORY REFERENCE\n"
-            "Matches FATF Typology: Rapid movement / Round-tripping. Ref: JMLSG Guidance Part I Chapter 6."
+            "Matches FATF Typology: Rapid movement / Round-tripping. Ref: FIU-IND STR Guidelines, RBI Master Direction on KYC 2016, Section 12 PMLA 2002."
         ),
         "tags": ["rapid movement", "round-tripping", "wire transfers", "high-risk jurisdictions"]
     },
@@ -100,7 +100,7 @@ SAR_TEMPLATES = [
             "Law enforcement referral: [LEA_REF] (if applicable).\n\n"
             "SECTION 4: ACTION TAKEN\n"
             "Account placed under enhanced monitoring. Payments blocked pending investigation.\n"
-            "External report filed with Action Fraud (reference: [ACTIONFRAUD_REF])."
+            "External STR filed with FIU-IND (reference: [FIU_STR_REF]). Reported to local Cyber Crime Cell (ref: [CYBERCRIME_REF]) where applicable."
         ),
         "tags": ["fraud", "mule account", "APP fraud", "consumer fraud", "cyber fraud"]
     },
@@ -116,11 +116,11 @@ SAR_TEMPLATES = [
             "[NUM_TRANSFERS] international wire transfers totaling [TOTAL_AMOUNT] sent to/received from\n"
             "[COUNTRY] between [DATE_FROM] and [DATE_TO]. Beneficiaries: [BENEFICIARY_LIST].\n\n"
             "SECTION 3: REGULATORY CONCERN\n"
-            "[COUNTRY] is identified on HM Treasury sanctions list / FATF grey list / OFAC SDN list.\n"
+            "[COUNTRY] is identified on Ministry of Finance / FATF grey list / OFAC SDN list / RBI advisory on high-risk jurisdictions.\n"
             "Transfers lack credible business justification. Customer unable to provide satisfactory\n"
             "explanation for the nature of these transactions.\n\n"
             "SECTION 4: CONCLUSION\n"
-            "Activity reported under Terrorism Financing / Sanctions Evasion / AML obligations."
+            "Activity reported under PMLA 2002, Section 12 — STR filed with FIU-IND within 7 days of detection. Possible Terrorism Financing / Sanctions Evasion under UAPA."
         ),
         "tags": ["high-risk jurisdiction", "sanctions", "FATF", "cross-border", "wire transfer"]
     }
@@ -128,145 +128,147 @@ SAR_TEMPLATES = [
 
 REGULATORY_GUIDELINES = [
     {
-        "id": "reg_poca_2002",
-        "title": "Proceeds of Crime Act 2002 (POCA) - SAR Filing Requirements",
-        "content": """PROCEEDS OF CRIME ACT 2002 (UK) - SAR FILING OBLIGATIONS
+        "id": "reg_pmla_2002",
+        "title": "Prevention of Money Laundering Act 2002 (PMLA) - STR Filing Requirements",
+        "content": """PREVENTION OF MONEY LAUNDERING ACT 2002 (INDIA) - STR FILING OBLIGATIONS
 
-Under the Proceeds of Crime Act 2002, a Suspicious Activity Report (SAR) must be submitted 
-to the National Crime Agency (NCA) where a person knows or suspects, or has reasonable grounds 
-for knowing or suspecting, that another person is engaged in money laundering.
+Under Section 12 of PMLA 2002, every banking company, financial institution, and intermediary
+must maintain records and furnish information of suspicious transactions to FIU-IND.
 
 KEY REQUIREMENTS:
-1. Filing Deadline: SARs must be filed promptly; for consent SARs, within 7 days of request.
-2. Defence Against Money Laundering (DAML): Section 335-338 provide immunity from prosecution 
-   when consent obtained from NCA prior to completing a transaction.
-3. Tipping Off: Section 333A prohibits disclosure to subject of investigation.
-4. Penalty for non-filing: Up to 14 years imprisonment; unlimited fines for firms.
+1. Filing Deadline: STRs must be filed within 7 working days of forming suspicion.
+2. CTR Threshold: Cash transactions of ₹10,00,000 (₹10 lakh) or more must be reported as CTR.
+3. STR Obligation: Any transaction (regardless of amount) that appears suspicious must be filed as STR.
+4. Non-Tipping Off: Section 12A prohibits disclosure to the subject of investigation.
+5. Penalty for non-filing: Up to 7 years rigorous imprisonment; fine up to ₹5,00,000 under Section 13 PMLA.
+6. Enforcement: Enforcement Directorate (ED) investigates PMLA violations; CBI for predicate offences.
 
 NARRATIVE STANDARDS:
 - Must include: who, what, when, where, why suspicious
 - Must reference specific transactions with dates, amounts, accounts
-- Should reference applicable money laundering typology
-- Must be factual, objective, and not speculative without evidential basis""",
-        "tags": ["POCA", "UK law", "NCA", "SAR filing", "DAML", "tipping off"]
+- Should reference applicable money laundering typology per FATF/FIU-IND guidance
+- Must be factual, objective, and not speculative without evidential basis
+- All amounts in INR (₹) using Indian numbering system (lakhs, crores)""",
+        "tags": ["PMLA", "India law", "FIU-IND", "STR filing", "CTR", "ED", "RBI"]
     },
     {
-        "id": "reg_jmlsg_guidance",
-        "title": "JMLSG Guidance - SAR Narrative Standards",
-        "content": """JOINT MONEY LAUNDERING STEERING GROUP (JMLSG) GUIDANCE
+        "id": "reg_rbi_kyc_directions",
+        "title": "RBI Master Directions on KYC 2016 - AML/CFT Obligations",
+        "content": """RESERVE BANK OF INDIA - MASTER DIRECTIONS ON KYC 2016 (UPDATED)
 
-SAR NARRATIVE BEST PRACTICE:
+STR/SAR NARRATIVE BEST PRACTICE (per RBI and IBA Guidelines):
 
-1. CLARITY: Narratives should be written in plain English, clearly describing why activity 
-   is suspicious. Avoid jargon or abbreviations without explanation.
+1. CLARITY: Narratives should describe clearly why activity is suspicious.
+   Avoid jargon. Write in plain language for review by FIU-IND analysts.
 
-2. COMPLETENESS - A good SAR narrative answers:
-   WHO is involved (subject details, counterparties)
-   WHAT activity occurred (transaction details, amounts, dates)
+2. COMPLETENESS - A good STR narrative answers:
+   WHO is involved (customer details, KYC data, counterparties)
+   WHAT activity occurred (transaction details, amounts, dates, channels — NEFT/RTGS/IMPS/UPI)
    WHEN the activity took place (date range, frequency)
-   WHERE the activity occurred (accounts, jurisdictions)
+   WHERE the activity occurred (accounts, branches, jurisdictions)
    WHY it is suspicious (deviation from norms, red flags, typology match)
-   HOW it was detected (monitoring rule, staff referral, etc.)
+   HOW it was detected (transaction monitoring rule, branch staff referral, etc.)
 
-3. PROPORTIONALITY: Narrative length and complexity should be proportionate to complexity 
-   of underlying activity. Complex schemes require detailed narratives.
+3. PROPORTIONALITY: Narrative length should match complexity of the activity.
 
-4. OBJECTIVITY: State facts. Avoid opinion unsupported by evidence. 
-   Say 'the customer was unable to provide satisfactory explanation' not 'the customer lied'.
+4. OBJECTIVITY: State facts. Avoid unsupported opinion.
+   Say 'customer was unable to provide satisfactory explanation' not 'customer lied'.
 
-5. TYPOLOGY REFERENCE: Reference recognised money laundering or terrorist financing typologies 
-   where applicable (FATF, NCA, HMRC guidance).""",
-        "tags": ["JMLSG", "narrative standards", "best practice", "5W1H", "UK AML"]
+5. TYPOLOGY REFERENCE: Reference recognised ML/TF typologies per FATF, FIU-IND Annual Reports.
+
+6. PEP/SANCTIONS SCREENING: Mandatory screening against UN Consolidated List, MHA lists, RBI caution lists.""",
+        "tags": ["RBI", "KYC", "AML", "CFT", "narrative standards", "India", "FIU-IND"]
     },
     {
         "id": "reg_fatf_typologies",
-        "title": "FATF Money Laundering Typologies Reference",
-        "content": """FINANCIAL ACTION TASK FORCE (FATF) - MONEY LAUNDERING TYPOLOGIES
+        "title": "FATF Money Laundering Typologies Reference (India Context)",
+        "content": """FINANCIAL ACTION TASK FORCE (FATF) - MONEY LAUNDERING TYPOLOGIES (INDIA CONTEXT)
 
-1. STRUCTURING (SMURFING): Breaking large amounts into smaller amounts deposited separately 
-   to avoid reporting thresholds. Red flag: Multiple cash deposits just below threshold.
+1. STRUCTURING (SMURFING): Breaking large amounts into smaller deposits to avoid RBI CTR threshold
+   of ₹10,00,000. Red flag: Multiple cash deposits just below ₹10 lakh.
 
-2. LAYERING VIA WIRE TRANSFERS: Rapid movement of funds through multiple accounts/jurisdictions 
-   to obscure origin. Red flag: Frequent int'l transfers with no commercial purpose.
+2. LAYERING VIA NEFT/RTGS/IMPS: Rapid movement of funds through multiple accounts.
+   Red flag: Frequent transfers with no commercial purpose; pass-through pattern.
 
-3. TRADE-BASED MONEY LAUNDERING (TBML): Disguising proceeds through trade transactions. 
-   Red flags: Over/under invoicing, multiple invoicing, misrepresentation of goods.
+3. TRADE-BASED MONEY LAUNDERING (TBML): Disguising proceeds through import/export invoices.
+   Red flags: Over/under invoicing; misrepresentation of goods; GST mismatches.
 
-4. REAL ESTATE LAUNDERING: Using property transactions to launder proceeds. 
-   Red flags: All-cash transactions, property flipping, third-party payments.
+4. REAL ESTATE LAUNDERING: Using property transactions. Common in India.
+   Red flags: All-cash or undeclared payments; benami property; stamp duty undervaluation.
 
-5. SHELL COMPANY / NOMINEE USE: Using corporate vehicles to distance criminal from funds. 
-   Red flags: Complex ownership, bearer shares, nominee directors.
+5. SHELL COMPANY / HAWALA: Using companies or informal value transfer to distance criminal from funds.
+   Red flags: Complex MCA21 ownership structures; ED-monitored hawala networks.
 
-6. CRYPTOCURRENCY CONVERSION: Converting proceeds through virtual assets. 
-   Red flags: P2P exchanges, mixing services, privacy coins.
+6. CRYPTOCURRENCY / UPI FRAUD: Converting proceeds through virtual assets or UPI networks.
+   Red flags: P2P crypto exchanges; mule UPI accounts; SIM swap fraud proceeds.
 
-7. TERRORISM FINANCING: Funding terrorist activity, may involve small amounts. 
-   Red flags: Transfers to conflict regions, payments to listed individuals/entities.
+7. TERRORISM FINANCING (under UAPA): Funding terrorist activity.
+   Red flags: Transfers to UAPA-designated entities; links to conflict regions.
 
-8. PROLIFERATION FINANCING: Financing weapons of mass destruction programs.
-   Red flags: Transactions linked to designated entities, dual-use goods.""",
-        "tags": ["FATF", "typologies", "structuring", "layering", "TBML", "terrorism financing"]
+8. ROUND-TRIPPING: Funds moved outside India and returned as FDI to disguise origin.
+   Red flags: Mauritius/Singapore/Cayman routes; FEMA violation indicators.""",
+        "tags": ["FATF", "typologies", "structuring", "layering", "TBML", "hawala", "India"]
     },
     {
-        "id": "reg_fca_requirements",
-        "title": "FCA SYSC Rules on AML Suspicious Activity Reporting",
-        "content": """FCA SYSTEMS AND CONTROLS (SYSC) - AML OBLIGATIONS
+        "id": "reg_fiu_ind_guidelines",
+        "title": "FIU-IND Reporting Guidelines for Scheduled Commercial Banks",
+        "content": """FINANCIAL INTELLIGENCE UNIT – INDIA (FIU-IND) REPORTING GUIDELINES
 
-Under FCA SYSC 3.2.6R and 6.3.1R, regulated firms must:
+FIU-IND is the national agency under the Ministry of Finance responsible for receiving,
+processing, analysing and disseminating financial intelligence under PMLA 2002.
 
-1. APPOINTMENT OF MLRO: Designated Money Laundering Reporting Officer responsible for 
-   receiving internal SARs and deciding whether to submit to NCA.
+REPORTING ENTITIES (Banks, NBFCs, Regulated Entities):
 
-2. INTERNAL SAR PROCESS: Staff must report suspicions to MLRO. MLRO evaluates and 
-   determines whether external SAR submission is required. Documented decision trail mandatory.
+1. SUSPICIOUS TRANSACTION REPORT (STR): Filed where transaction arouses suspicion of ML/TF
+   regardless of amount. Filed within 7 working days via FINnet Gateway.
 
-3. RECORD KEEPING: All SAR-related records must be retained for minimum 5 years (POCA S.337).
-   Records include: transaction records, customer due diligence, SAR text, reasons for filing.
+2. CASH TRANSACTION REPORT (CTR): All cash transactions ≥ ₹10,00,000 in a single day
+   (aggregate per customer). Filed by 15th of following month.
 
-4. TRAINING: All relevant staff must receive regular AML/CTF training including SAR obligations.
+3. COUNTERFEIT CURRENCY REPORT (CCR): Report fake currency notes detected.
 
-5. QUALITY OF SARs: FCA expects SARs to be of sufficient quality to enable NCA to assess 
-   whether further action is warranted. Poor quality SARs may constitute a regulatory breach.
+4. NON-PROFIT ORGANISATION REPORT (NTR): Transactions of NPOs meeting threshold criteria.
 
-THEMATIC GUIDANCE: FCA Financial Crime Guide (FCG) provides detailed sector-specific guidance 
-on suspicious activity indicators and appropriate SAR content.""",
-        "tags": ["FCA", "SYSC", "MLRO", "record keeping", "UK regulation", "compliance"]
+5. CROSS BORDER WIRE TRANSFER REPORT (CBWTR): Inbound/outbound wire transfers ≥ ₹5,00,000.
+
+PRINCIPAL OFFICER (PO): Designated MLRO equivalent responsible for filing with FIU-IND.
+Must maintain audit trail of all STR decisions (filed or not filed + rationale).
+
+FINnet 2.0: Current digital reporting portal for all FIU-IND submissions.""",
+        "tags": ["FIU-IND", "STR", "CTR", "CBWTR", "FINnet", "PMLA", "India"]
     },
     {
-        "id": "reg_aml_red_flags",
-        "title": "Key AML Red Flag Indicators for SAR Narratives",
-        "content": """AML RED FLAG INDICATORS - FOR SAR NARRATIVE REFERENCE
+        "id": "reg_aml_red_flags_india",
+        "title": "Key AML Red Flag Indicators for Indian Banks (RBI/IBA Guidance)",
+        "content": """AML RED FLAG INDICATORS - INDIAN BANKING CONTEXT (RBI/IBA)
 
 CUSTOMER BEHAVIOUR RED FLAGS:
-- Reluctance to provide KYC documentation
+- Reluctance to provide KYC documents (Aadhaar, PAN, VCIPL)
 - Inconsistent explanations for transactions
-- Transactions inconsistent with stated business/income
-- Sudden change in transaction patterns
-- Use of multiple accounts for no apparent reason
+- Transactions inconsistent with stated business/income (ITR mismatch)
+- Sudden reactivation of dormant account with high-value transactions
+- Multiple accounts at different branches for no apparent reason
 
 TRANSACTION RED FLAGS:
-- Cash transactions just below reporting thresholds (structuring)
-- Rapid movement of funds with no apparent business purpose
-- Round-number transactions (e.g., exactly ₹9,999 or ₹99,999)
-- Transactions with high-risk counterparties or jurisdictions
-- Unexplained significant increases in transaction volume/value
+- Cash deposits just below ₹10,00,000 RBI CTR threshold (structuring)
+- Rapid NEFT/RTGS/IMPS movement with no apparent business purpose
+- Round-number transactions (₹9,99,000 or ₹49,000 — below PAN threshold)
+- IMPS/UPI transactions to multiple unrelated beneficiaries
 - Immediate withdrawal of deposited funds ("in-out" pattern)
-- Unusual geographic dispersion of senders/recipients
+- Unexplained significant jump in monthly transaction volume
 
 ACCOUNT/PRODUCT RED FLAGS:
-- New account receiving immediate large credits
-- Account dormancy followed by sudden reactivation with high-value transactions
-- Use of personal accounts for business transactions
-- International wire transfers to/from high-risk countries
-- Multiple third-party payments to a single beneficiary
+- New account (<6 months) receiving large credits immediately
+- Personal account used for business-scale transactions (GST turnover mismatch)
+- International remittances under FEMA to high-risk jurisdictions
+- Multiple demand drafts/cash payments to single entity below reporting threshold
 
 COUNTERPARTY RED FLAGS:
-- Counterparties on sanctions/PEP lists
-- Counterparties in FATF grey/blacklisted jurisdictions
-- No apparent relationship between customer and counterparty
-- Use of intermediaries with no business justification""",
-        "tags": ["red flags", "AML indicators", "suspicious activity", "typology", "detection"]
+- Counterparties on UAPA/UN/OFAC/MHA designated lists
+- Counterparties in FATF grey/blacklisted countries (per RBI advisory)
+- Transactions with no apparent relationship between customer and beneficiary
+- Benami accounts or shell companies as counterparties""",
+        "tags": ["red flags", "AML indicators", "India", "RBI", "IBA", "KYC", "suspicious activity"]
     }
 ]
 

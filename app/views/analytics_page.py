@@ -11,6 +11,7 @@ from app.models.database import (
     SARCase, TransactionAlert, CustomerProfile, AuditLog,
     CaseStatus, SessionLocal
 )
+from app.utils.data_processor import format_inr
 
 
 def get_analytics_data():
@@ -47,7 +48,7 @@ def show_analytics(user: dict):
     ai_gen_events = sum(1 for l in audit_logs if l.action == "SAR_GENERATION_COMPLETED")
     k1, k2, k3, k4 = st.columns(4)
     for col, val, label, color in [
-        (k1, f"₹{total_amount:,.0f}", "Total Alert Value", "#00205b"),
+        (k1, format_inr(total_amount), "Total Alert Value", "#00205b"),
         (k2, f"{avg_tx_per_alert:.1f}", "Avg Tx per Alert", "#1565c0"),
         (k3, filed_count, "SARs Filed", "#2e7d32"),
         (k4, ai_gen_events, "AI Generations", "#e65100"),

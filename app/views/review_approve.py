@@ -144,7 +144,7 @@ def file_sar(case_id: str, user_id: int, username: str, sar_ref: str) -> bool:
         )
         alert_service.create_alert(
             "SAR_FILED",
-            f"SAR Case {case_id} has been filed with NCA. Reference: {sar_ref}",
+            f"SAR Case {case_id} has been filed with FIU-IND. Reference: {sar_ref}",
             case_id=case_id
         )
         return True
@@ -268,10 +268,10 @@ def show_review_approve(user: dict):
                 elif case.status == CaseStatus.APPROVED:
                     if has_permission(user["role"], "file_sar"):
                         st.success("✅ Approved — Ready for Filing")
-                        sar_ref = st.text_input("NCA SAR Reference", placeholder="e.g. SAR-2024-XXXXX")
-                        if st.button("📤 File with NCA", use_container_width=True, type="primary"):
+                        sar_ref = st.text_input("FIU-IND STR Reference", placeholder="e.g. STR-2024-XXXXX")
+                        if st.button("📤 File with FIU-IND", use_container_width=True, type="primary"):
                             if not sar_ref:
-                                st.error("Please enter the NCA SAR reference.")
+                                st.error("Please enter the FIU-IND STR reference.")
                             else:
                                 if file_sar(case.case_id, user["id"], user["username"], sar_ref):
                                     st.success(f"SAR Filed! Reference: {sar_ref}")

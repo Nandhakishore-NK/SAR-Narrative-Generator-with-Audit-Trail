@@ -13,7 +13,7 @@ from app.models.database import (
 from app.services.sar_generator import sar_generator
 from app.services.audit_service import audit_service
 from app.services.alert_service import alert_service
-from app.utils.data_processor import get_customer_dict, get_alert_dict
+from app.utils.data_processor import get_customer_dict, get_alert_dict, format_inr
 from app.utils.auth import has_permission
 
 
@@ -114,7 +114,7 @@ def show_sar_generator(user: dict):
             alerts = load_alerts(selected_customer.customer_id)
             if alerts:
                 alert_options = {
-                    f"[{a.severity.value}] {a.alert_type} | ₹{a.total_amount:,.0f} | {a.alert_id}": a
+                    f"[{a.severity.value}] {a.alert_type} | {format_inr(a.total_amount)} | {a.alert_id}": a
                     for a in alerts
                 }
                 selected_alert_label = st.selectbox("Transaction Alert", list(alert_options.keys()))
@@ -132,7 +132,7 @@ def show_sar_generator(user: dict):
                     </div>
                     <div style="font-size:0.83rem;color:#555;margin-top:6px;">
                         <div>🏢 {c.occupation} @ {c.employer or 'N/A'}</div>
-                        <div>� Annual Income: ₹{c.annual_income:,.0f}</div>
+                        <div>💰 Annual Income: {format_inr(c.annual_income)}</div>
                         <div>🌍 Nationality: {c.nationality}</div>
                         <div>{'⚠️ PEP Customer' if c.pep_status else '✅ Non-PEP'} | KYC: {c.kyc_status}</div>
                     </div>
@@ -155,9 +155,9 @@ def show_sar_generator(user: dict):
                         <span style="background:{sc};color:white;padding:2px 8px;border-radius:10px;font-size:0.75rem;">{sev_val}</span>
                     </div>
                     <div style="margin-top:6px;font-size:0.83rem;color:#555;">
-                        <div>💰 Total: <b>₹{a.total_amount:,.2f}</b> across {a.transaction_count} transactions</div>
+                        <div>💰 Total: <b>{format_inr(a.total_amount)}</b> across {a.transaction_count} transactions</div>
                         <div>📅 {a.date_range_start} → {a.date_range_end}</div>
-                        <div>🌍 Jurisdictions: {', '.join(a.jurisdictions_involved or ['UK'])}</div>
+                        <div>🌍 Jurisdictions: {', '.join(a.jurisdictions_involved or ['India'])}</div>
                         <div>📊 Alert Score: <b>{a.alert_score}/100</b></div>
                     </div>
                 </div>
@@ -172,7 +172,7 @@ def show_sar_generator(user: dict):
                     help="System will tailor compliance considerations to your hosting environment"
                 )
                 include_rag = st.checkbox("Use RAG (SAR templates + regulatory context)", value=True)
-                st.caption("RAG retrieves relevant SAR templates and JMLSG/POCA regulatory guidance from ChromaDB")
+                st.caption("RAG retrieves relevant STR templates and RBI/PMLA/FIU-IND regulatory guidance from in-memory TF-IDF index")
 
         if alerts:
             st.markdown("---")
@@ -315,7 +315,7 @@ def show_sar_generator(user: dict):
                 manual_cid = st.text_input("Customer ID*", value=f"CUST-MANUAL-{str(uuid.uuid4().hex[:4]).upper()}")
                 manual_occ = st.text_input("Occupation", placeholder="e.g. Business Owner")
                 manual_income = st.number_input("Annual Income (₹)", min_value=0.0, value=50000.0, step=1000.0)
-                manual_nationality = st.text_input("Nationality", placeholder="e.g. British")
+                manual_nationality = st.text_input("Nationality", placeholder="e.g. Indian")
                 manual_risk = st.selectbox("Risk Rating", ["LOW", "MEDIUM", "HIGH", "VERY HIGH"], index=2)
                 manual_pep = st.checkbox("PEP Customer")
             with mc2:
@@ -326,7 +326,7 @@ def show_sar_generator(user: dict):
                 ])
                 manual_total = st.number_input("Total Transaction Amount (₹)", min_value=0.0, value=100000.0, step=1000.0)
                 manual_tx_count = st.number_input("Number of Transactions", min_value=1, value=10)
-                manual_jurisdictions = st.text_input("Jurisdictions Involved", placeholder="e.g. UK, UAE, Cayman Islands")
+                manual_jurisdictions = st.text_input("Jurisdictions Involved", placeholder="e.g. India, UAE, Cayman Islands")
                 manual_counterparties = st.text_area("Counterparties (one per line)", height=60)
                 manual_factors = st.text_area("Triggering Factors / Suspicious Indicators (one per line)", height=80)
                 manual_env = st.selectbox("Hosting Environment", ["on-premises", "cloud-aws", "cloud-azure", "multi-cloud"])

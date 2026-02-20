@@ -21,12 +21,35 @@ from app.utils.data_processor import seed_sample_data
 
 @st.cache_resource
 def bootstrap():
-    create_tables()
-    seed_default_users()
-    seed_sample_data()
-    return True
+    errors = []
+    try:
+        create_tables()
+    except Exception as e:
+        errors.append(f"create_tables failed: {e}")
+    try:
+        seed_default_users()
+    except Exception as e:
+        errors.append(f"seed_default_users failed: {e}")
+    try:
+        # Verify at least one user exists after seeding
+        from app.models.database import SessionLocal, User
+        db = SessionLocal()
+        count = db.query(User).count()
+        db.close()
+        if count == 0:
+            errors.append("No users in DB after seeding — check DB write permissions")
+    except Exception as e:
+        errors.append(f"DB user-count check failed: {e}")
+    try:
+        seed_sample_data()
+    except Exception as e:
+        errors.append(f"seed_sample_data failed: {e}")
+    return errors
 
-bootstrap()
+_boot_errors = bootstrap()
+if _boot_errors:
+    for _err in _boot_errors:
+        st.error(f"⚠️ Boot error: {_err}")
 
 # ---- Login Wall ----
 from app.utils.auth import authenticate_user, has_permission, ROLE_COLORS

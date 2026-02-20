@@ -5,11 +5,26 @@ Provides realistic synthetic data for demo and testing.
 import random
 import uuid
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Tuple
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+# IST = UTC + 5:30
+_IST = timezone(timedelta(hours=5, minutes=30))
+
+def ist_now() -> datetime:
+    """Return current datetime in IST."""
+    return datetime.now(_IST)
+
+def to_ist(dt: datetime) -> datetime:
+    """Convert a naive UTC datetime (from DB) to IST for display."""
+    if dt is None:
+        return dt
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(_IST)
 from app.models.database import (
     CustomerProfile, TransactionAlert, SARCase, SessionLocal,
     AlertSeverity, CaseStatus

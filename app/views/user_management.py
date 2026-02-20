@@ -8,6 +8,7 @@ from app.utils.auth import (
     create_user, get_all_users, ROLE_COLORS, ROLE_DESCRIPTIONS,
     has_permission, hash_password
 )
+from app.utils.data_processor import to_ist
 from app.models.database import User, UserRole, SessionLocal
 from app.services.audit_service import audit_service
 
@@ -40,8 +41,8 @@ def show_user_management(user: dict):
                     "Role": u.role.value,
                     "Department": u.department,
                     "Active": "✅" if u.is_active else "❌",
-                    "Last Login": u.last_login.strftime("%d/%m/%Y %H:%M") if u.last_login else "Never",
-                    "Created": u.created_at.strftime("%d/%m/%Y") if u.created_at else "-",
+                    "Last Login": to_ist(u.last_login).strftime("%d/%m/%Y %H:%M IST") if u.last_login else "Never",
+                    "Created": to_ist(u.created_at).strftime("%d/%m/%Y") if u.created_at else "-",
                 })
             df = pd.DataFrame(rows)
             def style_role(val):

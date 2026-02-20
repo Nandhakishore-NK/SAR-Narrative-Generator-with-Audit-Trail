@@ -11,6 +11,7 @@ from app.models.database import (
 from app.services.audit_service import audit_service
 from app.services.alert_service import alert_service
 from app.utils.auth import has_permission
+from app.utils.data_processor import to_ist
 
 
 def load_review_cases():
@@ -173,7 +174,7 @@ def show_review_approve(user: dict):
         return
     # pre-select from session if coming from generator page
     pre_selected = st.session_state.pop("review_case_id", None)
-    case_options = {f"{c.case_id} | {c.customer_id} | [{c.status.value}] | {c.created_at.strftime('%d/%m/%Y %H:%M') if c.created_at else ''}": c for c in cases}
+    case_options = {f"{c.case_id} | {c.customer_id} | [{c.status.value}] | {to_ist(c.created_at).strftime('%d/%m/%Y %H:%M IST') if c.created_at else ''}": c for c in cases}
     # Find index for pre-selected
     default_idx = 0
     if pre_selected:
@@ -202,7 +203,7 @@ def show_review_approve(user: dict):
                 <span style="background:{sc};color:white;padding:2px 10px;border-radius:10px;font-size:0.78rem;font-weight:600;">{case.status.value}</span>
             </div>
             <div style="color:#607d8b;font-size:0.82rem;">
-                Created: {case.created_at.strftime('%d %b %Y %H:%M') if case.created_at else 'N/A'}
+                Created: {to_ist(case.created_at).strftime('%d %b %Y %H:%M IST') if case.created_at else 'N/A'}
                 {f' | Approved by: {case.approved_by}' if case.approved_by else ''}
             </div>
         </div>
@@ -319,7 +320,7 @@ def show_review_approve(user: dict):
                 cat = log.action_category or "GENERAL"
                 cc = cat_colors.get(cat, "#607d8b")
                 with st.expander(
-                    f"[{log.created_at.strftime('%d/%m/%Y %H:%M:%S') if log.created_at else ''}] "
+                    f"[{to_ist(log.created_at).strftime('%d/%m/%Y %H:%M:%S IST') if log.created_at else ''}] "
                     f"{log.action} — {cat}",
                     expanded=False
                 ):

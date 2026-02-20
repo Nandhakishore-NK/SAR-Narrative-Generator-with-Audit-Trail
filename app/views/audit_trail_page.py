@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from app.services.audit_service import audit_service
 from app.models.database import AuditLog, SessionLocal
 from app.utils.auth import has_permission
+from app.utils.data_processor import to_ist, ist_now
 
 
 def show_audit_trail(user: dict):
@@ -74,7 +75,7 @@ def show_audit_trail(user: dict):
     rows = []
     for log in logs:
         rows.append({
-            "Timestamp": log.created_at.strftime("%d/%m/%Y %H:%M:%S") if log.created_at else "-",
+            "Timestamp": to_ist(log.created_at).strftime("%d/%m/%Y %H:%M:%S IST") if log.created_at else "-",
             "Action": log.action,
             "Category": log.action_category or "-",
             "Case ID": log.case_id or "-",
@@ -107,7 +108,7 @@ def show_audit_trail(user: dict):
         }
         icon = cat_icons.get(log.action_category, "📝")
         with st.expander(
-            f"{icon} [{log.created_at.strftime('%d/%m/%Y %H:%M:%S') if log.created_at else ''}] "
+            f"{icon} [{to_ist(log.created_at).strftime('%d/%m/%Y %H:%M:%S IST') if log.created_at else ''}] "
             f"{log.action} | Case: {log.case_id or 'N/A'}",
             expanded=False
         ):
@@ -140,6 +141,6 @@ def show_audit_trail(user: dict):
         st.download_button(
             "⬇️ Export Audit Log to CSV",
             csv,
-            file_name=f"audit_log_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            file_name=f"audit_log_export_{ist_now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv"
         )

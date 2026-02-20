@@ -11,6 +11,7 @@ from app.models.database import SARCase, TransactionAlert, CustomerProfile, Case
 from app.services.alert_service import alert_service
 from app.services.audit_service import audit_service
 from app.utils.auth import has_permission
+from app.utils.data_processor import ist_now
 
 
 def get_dashboard_stats():
@@ -69,7 +70,7 @@ def show_dashboard(user: dict):
             <p style="margin:0;opacity:0.8;font-size:0.85rem;">Real-time oversight of Suspicious Activity Reports</p>
         </div>
         <div style="text-align:right;color:rgba(255,255,255,0.7);font-size:0.8rem;">
-            {datetime.now().strftime('%A, %d %B %Y %H:%M')} | {user['full_name']}
+            {ist_now().strftime('%A, %d %B %Y %H:%M IST')} | {user['full_name']}
         </div>
     </div>
     """, unsafe_allow_html=True)

@@ -330,6 +330,47 @@ def show_sar_generator(user: dict):
                 manual_counterparties = st.text_area("Counterparties (one per line)", height=60)
                 manual_factors = st.text_area("Triggering Factors / Suspicious Indicators (one per line)", height=80)
                 manual_env = st.selectbox("Hosting Environment", ["on-premises", "cloud-aws", "cloud-azure", "multi-cloud"])
+
+            # ---- Transaction Details ----
+            st.markdown("---")
+            st.markdown("**💳 Transaction Details (Debit / Credit Entries)**")
+            st.caption("Enter individual transactions. At least one entry helps the AI generate a more accurate narrative.")
+
+            tx_cols = st.columns([2, 2, 2, 2, 2, 3, 2])
+            tx_cols[0].markdown("**Date**")
+            tx_cols[1].markdown("**Amount (₹)**")
+            tx_cols[2].markdown("**Type**")
+            tx_cols[3].markdown("**Counterparty**")
+            tx_cols[4].markdown("**Channel**")
+            tx_cols[5].markdown("**Description / Reference**")
+            tx_cols[6].markdown("**Jurisdiction**")
+
+            num_transactions = st.number_input("Number of transaction rows to enter", min_value=1, max_value=20, value=3, step=1)
+
+            manual_transactions = []
+            for i in range(int(num_transactions)):
+                row = st.columns([2, 2, 2, 2, 2, 3, 2])
+                tx_date   = row[0].text_input("", key=f"tx_date_{i}",   placeholder="YYYY-MM-DD", label_visibility="collapsed")
+                tx_amount = row[1].number_input("", key=f"tx_amt_{i}",  min_value=0.0, value=0.0, step=1000.0, label_visibility="collapsed")
+                tx_type   = row[2].selectbox("", ["CREDIT", "DEBIT"],   key=f"tx_type_{i}", label_visibility="collapsed")
+                tx_cp     = row[3].text_input("", key=f"tx_cp_{i}",     placeholder="Counterparty name", label_visibility="collapsed")
+                tx_chan   = row[4].selectbox("", ["ONLINE_BANKING", "MOBILE_APP", "NEFT", "RTGS", "IMPS", "BRANCH", "ATM", "UPI"], key=f"tx_chan_{i}", label_visibility="collapsed")
+                tx_desc   = row[5].text_input("", key=f"tx_desc_{i}",   placeholder="Description / reference", label_visibility="collapsed")
+                tx_jur    = row[6].text_input("", key=f"tx_jur_{i}",    placeholder="e.g. India", label_visibility="collapsed")
+                if tx_amount > 0:
+                    manual_transactions.append({
+                        "transaction_id": f"TXN-MANUAL-{i+1:03d}",
+                        "date": tx_date or datetime.now().strftime("%Y-%m-%d"),
+                        "amount": tx_amount,
+                        "type": tx_type,
+                        "counterparty": tx_cp or "Unknown",
+                        "channel": tx_chan,
+                        "description": tx_desc or f"{tx_type} transaction",
+                        "reference": f"REF-MANUAL-{i+1:03d}",
+                        "currency": "INR",
+                        "country": tx_jur or "India"
+                    })
+
             submitted_manual = st.form_submit_button("🤖 Generate SAR Narrative", type="primary", use_container_width=True)
 
         if submitted_manual:
@@ -361,7 +402,7 @@ def show_sar_generator(user: dict):
                         result = sar_generator.generate_narrative(
                             customer_data=customer_dict,
                             alert_data=alert_dict,
-                            transaction_data=[],
+                            transaction_data=manual_transactions,
                             hosting_environment=manual_env
                         )
                         st.success("✅ Narrative generated!")

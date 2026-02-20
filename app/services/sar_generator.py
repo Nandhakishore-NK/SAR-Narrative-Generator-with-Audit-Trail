@@ -221,8 +221,8 @@ class SARGenerator:
         indicators = []
         total_amount = alert.get("total_amount", 0)
         tx_count = alert.get("transaction_count", 0)
-        if total_amount > 100000:
-            indicators.append(f"HIGH VALUE: Total transactions of ₹{total_amount:,.2f} exceed ₹1,00,000 threshold")
+        if total_amount > 10000:
+            indicators.append(f"HIGH VALUE: Total transactions of £{total_amount:,.2f} exceed £10,000 threshold")
         if tx_count > 10:
             indicators.append(f"HIGH FREQUENCY: {tx_count} transactions detected in monitoring window")
         if customer.get("pep_status"):
@@ -237,12 +237,12 @@ class SARGenerator:
             amounts = [t.get("amount", 0) for t in transactions]
             amounts_near_threshold = [a for a in amounts if 8000 <= a <= 9999]
             if amounts_near_threshold:
-                indicators.append(f"STRUCTURING SUSPECTED: {len(amounts_near_threshold)} transactions near but below ₹10,000 threshold")
+                indicators.append(f"STRUCTURING SUSPECTED: {len(amounts_near_threshold)} transactions near but below £10,000 reporting threshold")
         if alert.get("alert_type", "").upper() in ["RAPID_MOVEMENT", "ROUND_TRIP", "PASS_THROUGH"]:
             indicators.append("PASS-THROUGH PATTERN: Rapid in-out transaction pattern detected")
         annual_income = customer.get("annual_income", 1)
         if annual_income and total_amount > (annual_income * 2):
-            indicators.append(f"INCOME DISPARITY: Transaction volume ({total_amount:,.0f}) exceeds 2x stated annual income ({annual_income:,.0f})")
+            indicators.append(f"INCOME DISPARITY: Transaction volume (£{total_amount:,.0f}) exceeds 2x stated annual income (£{annual_income:,.0f})")
         counterparties = alert.get("counterparties", [])
         if isinstance(counterparties, list) and len(counterparties) > 10:
             indicators.append(f"MULTIPLE COUNTERPARTIES: {len(counterparties)} distinct counterparties involved")
@@ -381,7 +381,7 @@ class SARGenerator:
 ### 1. EXECUTIVE SUMMARY
 This Suspicious Activity Report is filed in respect of {name} (Customer ID: {cid}) 
 following detection of {alert_type.replace('_', ' ')} activity. During the reporting period 
-{dt_start} to {dt_end}, transactions totalling ₹{amount:,.2f} across {tx_count} transactions 
+{dt_start} to {dt_end}, transactions totalling £{amount:,.2f} across {tx_count} transactions 
 were identified as potentially suspicious.
 
 ---
@@ -398,7 +398,7 @@ were identified as potentially suspicious.
 
 ### 3. DESCRIPTION OF SUSPICIOUS ACTIVITY
 The account was flagged for {alert_type.replace('_', ' ')} during the period {dt_start} to {dt_end}. 
-The total value of transactions under review amounts to ₹{amount:,.2f} across {tx_count} individual 
+The total value of transactions under review amounts to £{amount:,.2f} across {tx_count} individual 
 transactions. This activity appears inconsistent with the customer's stated profile.
 
 ---

@@ -222,31 +222,56 @@ class SARGenerator:
         indicators = []
         total_amount = alert.get("total_amount", 0)
         tx_count = alert.get("transaction_count", 0)
-        if total_amount > 10000:
-            indicators.append(f"HIGH VALUE: Total transactions of ₹{total_amount:,.2f} exceed ₹10,00,000 threshold")
-        if tx_count > 10:
-            indicators.append(f"HIGH FREQUENCY: {tx_count} transactions detected in monitoring window")
+
+        # RBI CTR threshold: cash transactions ≥ ₹10,00,000 (10 lakh) must be reported
+        if total_amount >= 1000000:
+            indicators.append(f"HIGH VALUE: Total transactions of ₹{total_amount:,.2f} meet or exceed RBI CTR threshold of ₹10,00,000")
+        # Mid-range suspicious: ₹5 lakh–₹10 lakh without clear business purpose
+        elif total_amount >= 500000:
+            indicators.append(f"ELEVATED VALUE: Total transactions of ₹{total_amount:,.2f} exceed ₹5,00,000 — warrants scrutiny under PMLA")
+
+        # High frequency: >20 transactions in a monitoring window is suspicious
+        if tx_count > 20:
+            indicators.append(f"HIGH FREQUENCY: {tx_count} transactions detected in monitoring window — unusually high activity")
+        elif tx_count > 10:
+            indicators.append(f"ELEVATED FREQUENCY: {tx_count} transactions detected in monitoring window")
+
         if customer.get("pep_status"):
-            indicators.append("PEP CUSTOMER: Subject is a Politically Exposed Person")
+            indicators.append("PEP CUSTOMER: Subject is a Politically Exposed Person — enhanced due diligence required under PMLA Rule 9")
         if customer.get("risk_rating") in ["HIGH", "VERY HIGH"]:
-            indicators.append(f"HIGH RISK CUSTOMER: Customer holds {customer.get('risk_rating')} risk rating")
+            indicators.append(f"HIGH RISK CUSTOMER: Customer holds {customer.get('risk_rating')} risk rating — mandatory enhanced KYC per RBI Master Direction")
+
         jurisdictions = alert.get("jurisdictions_involved", [])
-        high_risk_j = [j for j in jurisdictions if j in ["Iran", "North Korea", "Syria", "Russia", "Afghanistan", "Myanmar"]]
+        high_risk_j = [j for j in jurisdictions if j in ["Iran", "North Korea", "Syria", "Russia", "Afghanistan", "Myanmar", "Pakistan", "Yemen", "Libya"]]
         if high_risk_j:
-            indicators.append(f"HIGH RISK JURISDICTION: Transactions linked to {', '.join(high_risk_j)}")
+            indicators.append(f"HIGH RISK JURISDICTION: Transactions linked to FATF high-risk countries: {', '.join(high_risk_j)}")
+
         if transactions:
             amounts = [t.get("amount", 0) for t in transactions]
-            amounts_near_threshold = [a for a in amounts if 8000 <= a <= 9999]
+            # Structuring: multiple transactions just below ₹10 lakh (RBI CTR threshold)
+            amounts_near_threshold = [a for a in amounts if 900000 <= a <= 999999]
             if amounts_near_threshold:
-                indicators.append(f"STRUCTURING SUSPECTED: {len(amounts_near_threshold)} transactions near but below ₹10,00,000 reporting threshold")
+                indicators.append(f"STRUCTURING SUSPECTED: {len(amounts_near_threshold)} transactions in ₹9,00,000–₹9,99,999 range — structured to avoid RBI ₹10,00,000 CTR threshold")
+            # Also flag transactions just below ₹50,000 (PAN card threshold for cash)
+            amounts_near_pan = [a for a in amounts if 45000 <= a <= 49999]
+            if len(amounts_near_pan) >= 3:
+                indicators.append(f"PAN THRESHOLD EVASION: {len(amounts_near_pan)} cash transactions just below ₹50,000 PAN mandatory reporting limit")
+
         if alert.get("alert_type", "").upper() in ["RAPID_MOVEMENT", "ROUND_TRIP", "PASS_THROUGH"]:
-            indicators.append("PASS-THROUGH PATTERN: Rapid in-out transaction pattern detected")
+            indicators.append("PASS-THROUGH PATTERN: Funds received and immediately transferred out — typology consistent with layering under FATF guidance")
+
         annual_income = customer.get("annual_income", 1)
-        if annual_income and total_amount > (annual_income * 2):
-            indicators.append(f"INCOME DISPARITY: Transaction volume (₹{total_amount:,.0f}) exceeds 2x stated annual income (₹{annual_income:,.0f})")
+        if annual_income and total_amount > (annual_income * 3):
+            indicators.append(f"SEVERE INCOME DISPARITY: Transaction volume (₹{total_amount:,.0f}) exceeds 3x stated annual income (₹{annual_income:,.0f}) — inconsistent with customer profile")
+        elif annual_income and total_amount > (annual_income * 1.5):
+            indicators.append(f"INCOME DISPARITY: Transaction volume (₹{total_amount:,.0f}) exceeds 1.5x stated annual income (₹{annual_income:,.0f})")
+
         counterparties = alert.get("counterparties", [])
-        if isinstance(counterparties, list) and len(counterparties) > 10:
-            indicators.append(f"MULTIPLE COUNTERPARTIES: {len(counterparties)} distinct counterparties involved")
+        if isinstance(counterparties, list) and len(counterparties) > 15:
+            indicators.append(f"MULTIPLE COUNTERPARTIES: {len(counterparties)} distinct counterparties — consistent with smurfing or layering network")
+        elif isinstance(counterparties, list) and len(counterparties) > 7:
+            indicators.append(f"ELEVATED COUNTERPARTIES: {len(counterparties)} distinct counterparties involved")
+
         triggering_factors = alert.get("triggering_factors", [])
         if triggering_factors:
             indicators.extend(triggering_factors)

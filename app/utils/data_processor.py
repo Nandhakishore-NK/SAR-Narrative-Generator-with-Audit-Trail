@@ -23,40 +23,40 @@ SAMPLE_CUSTOMERS = [
         "nationality": "Indian",
         "id_type": "Passport",
         "id_number": "P12345678",
-        "address": "45 Baker Street, London, W1U 7AJ",
+        "address": "45, Brigade Road, Bengaluru, Karnataka - 560001",
         "occupation": "Import/Export Trader",
-        "employer": "Sharma Trading Ltd",
-        "annual_income": 85000.0,
+        "employer": "Sharma Trading Pvt Ltd",
+        "annual_income": 8500000.0,
         "risk_rating": "HIGH",
         "kyc_status": "VERIFIED",
         "kyc_date": "2023-01-10",
         "pep_status": False,
         "sanctions_checked": True,
         "account_opening_date": "2021-06-15",
-        "phone": "+44 7700 900123",
-        "email": "a.sharma@sharmatrading.co.uk",
-        "country": "United Kingdom"
+        "phone": "+91 98450 12345",
+        "email": "a.sharma@sharmatrading.in",
+        "country": "India"
     },
     {
         "customer_id": "CUST-002",
-        "full_name": "Elena Petrov",
+        "full_name": "Ravi Krishnamurthy",
         "date_of_birth": "1978-07-22",
-        "nationality": "Russian",
-        "id_type": "National ID",
-        "id_number": "RU87654321",
-        "address": "12 Mayfair Court, London, W1K 4QR",
-        "occupation": "Property Developer",
-        "employer": "Petrov Properties Ltd",
-        "annual_income": 250000.0,
+        "nationality": "Indian",
+        "id_type": "Aadhaar",
+        "id_number": "4567-8901-2345",
+        "address": "12, Banjara Hills, Road No. 2, Hyderabad, Telangana - 500034",
+        "occupation": "Real Estate Developer",
+        "employer": "Krishnamurthy Realty Ltd",
+        "annual_income": 25000000.0,
         "risk_rating": "VERY HIGH",
         "kyc_status": "ENHANCED_DUE_DILIGENCE",
         "kyc_date": "2023-03-22",
         "pep_status": True,
         "sanctions_checked": True,
         "account_opening_date": "2020-11-01",
-        "phone": "+44 7700 900456",
-        "email": "e.petrov@petrovproperties.co.uk",
-        "country": "United Kingdom"
+        "phone": "+91 99890 56789",
+        "email": "r.krishnamurthy@krrealty.in",
+        "country": "India"
     },
     {
         "customer_id": "CUST-003",
@@ -65,61 +65,61 @@ SAMPLE_CUSTOMERS = [
         "nationality": "UAE",
         "id_type": "Passport",
         "id_number": "UAE654321",
-        "address": "78 Knightsbridge, London, SW1X 7LA",
+        "address": "78, Linking Road, Bandra West, Mumbai, Maharashtra - 400050",
         "occupation": "Financial Consultant",
         "employer": "Self-Employed",
-        "annual_income": 120000.0,
+        "annual_income": 12000000.0,
         "risk_rating": "HIGH",
         "kyc_status": "VERIFIED",
         "kyc_date": "2023-05-15",
         "pep_status": False,
         "sanctions_checked": True,
         "account_opening_date": "2022-02-20",
-        "phone": "+44 7700 900789",
+        "phone": "+91 98200 78901",
         "email": "m.alrashid@gmail.com",
-        "country": "United Kingdom"
+        "country": "India"
     },
     {
         "customer_id": "CUST-004",
-        "full_name": "Li Wei Chen",
-        "date_of_birth": "1995-08-30",
-        "nationality": "Chinese",
-        "id_type": "Passport",
-        "id_number": "CN98765432",
-        "address": "33 Canary Wharf, London, E14 5DP",
+        "full_name": "Priya Venkatesh",
+        "date_of_birth": "1999-08-30",
+        "nationality": "Indian",
+        "id_type": "Aadhaar",
+        "id_number": "7890-1234-5678",
+        "address": "33, Velachery Main Road, Chennai, Tamil Nadu - 600042",
         "occupation": "Student",
         "employer": "N/A",
-        "annual_income": 12000.0,
+        "annual_income": 120000.0,
         "risk_rating": "MEDIUM",
         "kyc_status": "VERIFIED",
         "kyc_date": "2023-09-01",
         "pep_status": False,
         "sanctions_checked": True,
         "account_opening_date": "2023-09-01",
-        "phone": "+44 7700 900012",
-        "email": "liwei.chen@student.ac.uk",
-        "country": "United Kingdom"
+        "phone": "+91 90000 12345",
+        "email": "priya.venkatesh@student.edu.in",
+        "country": "India"
     },
     {
         "customer_id": "CUST-005",
-        "full_name": "Obiageli Nwosu",
+        "full_name": "Sunita Agarwal",
         "date_of_birth": "1972-05-18",
-        "nationality": "Nigerian",
-        "id_type": "Passport",
-        "id_number": "NG11223344",
-        "address": "56 Hackney Road, London, E2 7NX",
+        "nationality": "Indian",
+        "id_type": "PAN",
+        "id_number": "ABCPA1234Z",
+        "address": "56, Lajpat Nagar II, New Delhi - 110024",
         "occupation": "Retail Business Owner",
-        "employer": "Nwosu Retail Ltd",
-        "annual_income": 65000.0,
+        "employer": "Agarwal Traders Pvt Ltd",
+        "annual_income": 6500000.0,
         "risk_rating": "HIGH",
         "kyc_status": "VERIFIED",
         "kyc_date": "2022-11-20",
         "pep_status": False,
         "sanctions_checked": True,
         "account_opening_date": "2019-04-12",
-        "phone": "+44 7700 900345",
-        "email": "o.nwosu@nwosuretail.co.uk",
-        "country": "United Kingdom"
+        "phone": "+91 98110 34567",
+        "email": "s.agarwal@agarwaltraders.in",
+        "country": "India"
     }
 ]
 
@@ -130,19 +130,19 @@ SAMPLE_ALERTS = [
         "alert_type": "STRUCTURING",
         "alert_rule": "CASH_STRUCTURING_RULE_001",
         "severity": "HIGH",
-        "total_amount": 487500.0,
+        "total_amount": 48750000.0,
         "transaction_count": 47,
         "date_range_start": "2024-01-08",
         "date_range_end": "2024-01-15",
         "counterparties": [f"ACC-{str(i).zfill(4)}" for i in range(1, 48)],
-        "jurisdictions_involved": ["United Kingdom", "United Arab Emirates", "Hong Kong", "Cayman Islands"],
+        "jurisdictions_involved": ["India", "United Arab Emirates", "Hong Kong", "Cayman Islands"],
         "alert_score": 94.5,
         "triggering_factors": [
             "47 incoming transfers from different source accounts in 7 days",
-            "Immediate outbound international wire transfer of ₹485,000 following receipt",
-            "Transaction amounts structured at ₹9,500-₹9,999 range (below ₹10K threshold)",
-            "Destination account in UAE - high-risk jurisdiction",
-            "Activity inconsistent with stated occupation (Import/Export Trader) and income (₹85K)"
+            "Immediate outbound international wire transfer of ₹4,85,00,000 following receipt",
+            "Transaction amounts structured at ₹9,00,000–₹9,99,999 range — structured to avoid RBI CTR threshold of ₹10,00,000",
+            "Destination account in UAE - FATF high-risk jurisdiction",
+            "Activity inconsistent with stated occupation (Import/Export Trader) and annual income (₹85,00,000)"
         ]
     },
     {
@@ -151,19 +151,19 @@ SAMPLE_ALERTS = [
         "alert_type": "HIGH_RISK_JURISDICTION",
         "alert_rule": "INTL_WIRE_HIGH_RISK_004",
         "severity": "CRITICAL",
-        "total_amount": 2100000.0,
+        "total_amount": 210000000.0,
         "transaction_count": 8,
         "date_range_start": "2024-02-01",
         "date_range_end": "2024-02-28",
-        "counterparties": ["Petrov Holdings BVI", "Cayman Trust Co", "Cyprus Asset Management", "Dubai RE LLC"],
-        "jurisdictions_involved": ["Russia", "British Virgin Islands", "Cyprus", "United Arab Emirates"],
+        "counterparties": ["Krishnamurthy Holdings BVI", "Cayman Trust Co", "Cyprus Asset Management", "Dubai RE LLC"],
+        "jurisdictions_involved": ["India", "British Virgin Islands", "Cyprus", "United Arab Emirates"],
         "alert_score": 98.2,
         "triggering_factors": [
-            "PEP customer sending ₹2.1M to high-risk jurisdictions",
-            "Funds routed through multiple offshore shell company jurisdictions",
-            "No credible commercial explanation provided for transfers",
-            "Pattern consistent with sanctions evasion and money laundering through real estate",
-            "BVI and Cyprus shell companies identified as beneficiaries"
+            "PEP customer transferring ₹21,00,00,000 to high-risk jurisdictions in one month",
+            "Funds routed through multiple offshore shell companies — classic layering under PMLA",
+            "No credible commercial explanation provided for transfers despite bank enquiry",
+            "Pattern consistent with Round-tripping and money laundering through real estate",
+            "BVI and Cyprus shell companies identified as beneficiaries — FATF red flag"
         ]
     },
     {
@@ -172,19 +172,19 @@ SAMPLE_ALERTS = [
         "alert_type": "RAPID_MOVEMENT",
         "alert_rule": "PASS_THROUGH_RULE_007",
         "severity": "HIGH",
-        "total_amount": 350000.0,
+        "total_amount": 35000000.0,
         "transaction_count": 23,
         "date_range_start": "2024-03-10",
         "date_range_end": "2024-03-25",
-        "counterparties": ["Various UK Businesses", "Personal Account UAE", "Crypto Exchange A"],
-        "jurisdictions_involved": ["United Kingdom", "United Arab Emirates"],
+        "counterparties": ["Various Indian Businesses", "Personal Account UAE", "Crypto Exchange A"],
+        "jurisdictions_involved": ["India", "United Arab Emirates"],
         "alert_score": 87.3,
         "triggering_factors": [
-            "Rapid in-out movement: funds received and sent within 24-48 hours",
-            "Payments to cryptocurrency exchange inconsistent with financial consulting profile",
-            "23 transactions in 15 days with no apparent business purpose",
-            "Customer unable to provide satisfactory explanation for fund movements",
-            "Partial conversion to cryptocurrency detected"
+            "Rapid in-out movement: ₹3,50,00,000 received and transferred out within 24-48 hours",
+            "Payments to unregulated cryptocurrency exchange — non-compliant under RBI Virtual Currency guidelines",
+            "23 transactions in 15 days with no apparent business purpose declared",
+            "Customer unable to provide satisfactory explanation during bank enquiry",
+            "Partial conversion to cryptocurrency detected — potential layering vehicle"
         ]
     },
     {
@@ -193,19 +193,19 @@ SAMPLE_ALERTS = [
         "alert_type": "MULE_ACCOUNT",
         "alert_rule": "MULE_DETECTION_RULE_012",
         "severity": "CRITICAL",
-        "total_amount": 98500.0,
+        "total_amount": 9850000.0,
         "transaction_count": 12,
         "date_range_start": "2024-04-01",
         "date_range_end": "2024-04-05",
-        "counterparties": ["Unknown UK Individual", "Crypto Exchange B", "Cash ATM Withdrawals"],
-        "jurisdictions_involved": ["United Kingdom"],
+        "counterparties": ["Unknown Individual", "Crypto Exchange B", "Cash ATM Withdrawals"],
+        "jurisdictions_involved": ["India"],
         "alert_score": 96.1,
         "triggering_factors": [
-            "Student account with stated income of ₹12K received ₹98,500 in 5 days",
-            "Account opened only 7 months ago - recently opened account pattern",
-            "Immediate cash withdrawals and crypto conversions after receipt",
-            "Funds originate from multiple victims of suspected APP fraud",
-            "Customer contacted via social media with 'investment opportunity' - classic mule recruitment"
+            "Student account with stated annual income of ₹1,20,000 received ₹98,50,000 in 5 days — 82x income",
+            "Account opened only 7 months ago — recently opened account (mule recruitment indicator)",
+            "Immediate cash ATM withdrawals and crypto conversions after receipt — layering pattern",
+            "Funds originate from multiple victims of suspected UPI payment fraud",
+            "Customer reportedly contacted via social media with 'investment opportunity' — classic mule recruitment under PMLA"
         ]
     },
     {
@@ -214,26 +214,26 @@ SAMPLE_ALERTS = [
         "alert_type": "TRADE_BASED_ML",
         "alert_rule": "TBML_INVOICE_RULE_003",
         "severity": "MEDIUM",
-        "total_amount": 215000.0,
+        "total_amount": 21500000.0,
         "transaction_count": 15,
         "date_range_start": "2024-05-01",
         "date_range_end": "2024-05-31",
-        "counterparties": ["Lagos Imports Co", "Accra Trading Ltd", "Dubai Wholesale FZE"],
-        "jurisdictions_involved": ["United Kingdom", "Nigeria", "Ghana", "United Arab Emirates"],
+        "counterparties": ["Dubai Wholesale FZE", "Colombo Imports Pvt Ltd", "Karachi Trading Co"],
+        "jurisdictions_involved": ["India", "United Arab Emirates", "Pakistan", "Sri Lanka"],
         "alert_score": 73.8,
         "triggering_factors": [
-            "Invoice discrepancies: goods valued 340% above market rate in 6 invoices",
-            "Multiple payments for identical invoice numbers",
-            "Counterparties in Nigeria and Ghana - elevated risk jurisdictions",
-            "Import goods category inconsistent with registered SIC code",
-            "Payment routes: UK -> UAE -> Nigeria rather than direct bilateral"
+            "Invoice discrepancies: goods valued 340% above market rate across 6 invoices — over-invoicing suspected",
+            "Multiple NEFT payments referencing identical invoice numbers — duplicate payment fraud indicator",
+            "Counterparty in Pakistan — FATF grey-listed jurisdiction per RBI advisory",
+            "Import goods category (electronics) inconsistent with registered GST business activity (textiles)",
+            "Payment routes: India → UAE → Pakistan rather than direct bilateral — classic TBML layering"
         ]
     }
 ]
 
 SAMPLE_TRANSACTIONS_TEMPLATE = {
     "ALT-2024-001": [
-        {"date": f"2024-01-{str(d).zfill(2)}", "amount": random.uniform(9450, 9999),
+        {"date": f"2024-01-{str(d).zfill(2)}", "amount": random.uniform(900000, 999999),
          "type": "CREDIT", "counterparty": f"Individual ACC-{str(i).zfill(4)}",
          "reference": f"REF-{uuid.uuid4().hex[:8].upper()}",
          "description": "Transfer from individual"}
@@ -261,7 +261,7 @@ def generate_transactions_for_alert(alert: Dict) -> List[Dict]:
         tx_date = start + timedelta(days=random.randint(0, days_range))
         tx_amount = per_tx * random.uniform(0.85, 1.15)
         if alert_type == "STRUCTURING":
-            tx_amount = random.uniform(9000, 9999)
+            tx_amount = random.uniform(900000, 999999)  # Just below RBI CTR threshold of ₹10,00,000
         txn = {
             "transaction_id": f"TXN-{uuid.uuid4().hex[:10].upper()}",
             "date": tx_date.strftime("%Y-%m-%d"),

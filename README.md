@@ -1,13 +1,17 @@
-# SAR Guardian — Regulator-Grade SAR Narrative Generator with Immutable Audit Trail
+﻿# SAR Guardian — Regulator-Grade SAR Narrative Generator with Immutable Audit Trail
+
+> **Barclays AML Compliance Platform** — AI-assisted Suspicious Activity Report drafting with full machine-auditable reasoning.
+
+---
 
 ## Overview
 
-SAR Guardian is a production-ready, full-stack Financial Crime Compliance application that generates Suspicious Activity Report (SAR) draft narratives with complete machine-auditable reasoning records.
+SAR Guardian is a full-stack Financial Crime Compliance application that generates SAR draft narratives powered by a large language model, with complete sentence-level evidence traceability and a tamper-evident audit trail.
 
 ### Regulatory Alignment
-- **FinCEN** — Financial Crimes Enforcement Network
-- **FIU-IND** — Financial Intelligence Unit – India
-- **FATF** — Financial Action Task Force
+- **FinCEN** — Financial Crimes Enforcement Network  
+- **FIU-IND** — Financial Intelligence Unit – India  
+- **FATF** — Financial Action Task Force  
 
 ---
 
@@ -15,13 +19,13 @@ SAR Guardian is a production-ready, full-stack Financial Crime Compliance applic
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | FastAPI, SQLAlchemy, Alembic, LangChain, Pydantic |
-| Frontend | Next.js 14 (App Router), TypeScript, TailwindCSS, shadcn/ui |
-| Database | PostgreSQL 16 |
-| Cache | Redis 7 |
-| Vector Store | ChromaDB |
+| Compliance UI | Streamlit (deployed on Streamlit Cloud) |
+| Backend API | FastAPI, SQLAlchemy (async), Alembic |
+| Database | PostgreSQL via Supabase |
 | Auth | JWT + bcrypt |
-| Containerization | Docker + docker-compose |
+| LLM | Groq (`llama-3.3-70b-versatile`) · OpenAI (`gpt-4o`) fallback |
+| LLM Orchestration | LangChain |
+| Next.js Frontend | Next.js 14, TypeScript, TailwindCSS, shadcn/ui |
 
 ---
 
@@ -29,57 +33,100 @@ SAR Guardian is a production-ready, full-stack Financial Crime Compliance applic
 
 ### Core Capabilities
 - **SAR Narrative Generation** — LLM-powered draft narratives from structured case data
-- **Immutable Audit Trail** — Every action logged with hash-chain integrity
-- **Sentence-Level Evidence Mapping** — Each narrative sentence maps to transaction IDs, rule triggers, and typologies
+- **Sentence-Level Evidence Mapping** — Each narrative sentence maps to transaction IDs, rule triggers, and typologies with SHA-256 hashing
+- **Immutable Audit Trail** — Every action logged with hash-chain integrity; fully queryable
 - **Override Governance** — Material edits require evidence, reason codes, and supervisor approval for HIGH/CRITICAL severity
-- **Role-Based Access Control** — Analyst, Supervisor, Admin with strict data boundaries
-- **RAG Integration** — Regulatory template retrieval via ChromaDB
+- **Role-Based Access Control** — Read-Only, Analyst, Supervisor, Admin with strict data boundaries
+- **Alerts Centre** — Real-time alert feed with severity filtering, unread tracking, and mark-as-read
 
 ### Compliance Enforcement
-- No hallucination policy — every claim maps to evidence
+- No hallucination — every claim maps to a transaction ID or rule trigger
 - No legal conclusions — regulator-safe language only
-- No discriminatory language — suspicion based solely on financial behavior
-- No cross-case data leakage
-- Prompt injection prevention
+- No discriminatory language — suspicion based solely on financial behaviour
+- Prompt injection prevention in all LLM calls
 
 ---
 
-## Quick Start
+## Deployed App
+
+The Streamlit compliance UI is deployed at:
+
+**[https://sar-narrative-generator-with-audit-trail.streamlit.app](https://sar-narrative-generator-with-audit-trail.streamlit.app)**
+
+### Demo Credentials
+
+| Role | Username | Password |
+|------|----------|----------|
+| Admin | `admin` | `Admin@2024!` |
+| Analyst | `analyst1` | `Analyst@2024!` |
+| Supervisor | `supervisor1` | `Supervisor@2024!` |
+| Read-Only | `readonly1` | `Readonly@2024!` |
+
+---
+
+## Running Locally
 
 ### Prerequisites
-- Docker & Docker Compose
-- OpenAI API key (or Bedrock-compatible endpoint)
+- Python 3.11+
+- Node.js 18+ (for the Next.js frontend)
+- A Groq API key ([console.groq.com](https://console.groq.com)) **or** an OpenAI API key
 
-### Setup
+### Streamlit App (quickest start)
 
 ```bash
 # 1. Clone the repository
-git clone <repo-url> && cd SAR
+git clone https://github.com/Nandhakishore-NK/SAR-Narrative-Generator-with-Audit-Trail.git
+cd SAR-Narrative-Generator-with-Audit-Trail
 
-# 2. Copy environment variables
-cp .env.example .env
+# 2. Create and activate a virtual environment
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# macOS / Linux:
+source .venv/bin/activate
 
-# 3. Edit .env with your API keys and secrets
-# IMPORTANT: Change JWT_SECRET_KEY and POSTGRES_PASSWORD
+# 3. Install dependencies
+pip install -r requirements.txt
 
-# 4. Start all services
-docker-compose up --build -d
-
-# 5. Seed demo data (optional)
-docker-compose exec backend python seed.py
-
-# 6. Open the application
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000/docs
+# 4. Run the Streamlit app
+streamlit run streamlit_app.py
 ```
 
-### Default Demo Users (after seeding)
+Open http://localhost:8501 and log in with any demo credential above.
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@sarguardian.com | Admin@123 |
-| Supervisor | supervisor@sarguardian.com | Super@123 |
-| Analyst | analyst@sarguardian.com | Analyst@123 |
+### FastAPI Backend
+
+```bash
+cd backend
+
+# Install backend dependencies
+pip install -r requirements.txt
+
+# Apply database migrations
+alembic upgrade head
+
+# Seed demo data (optional)
+python seed.py
+
+# Start the API server
+uvicorn app.main:app --reload --port 8000
+```
+
+API docs available at http://localhost:8000/docs.
+
+### Next.js Frontend
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start the dev server
+npm run dev
+```
+
+Frontend available at http://localhost:3000.
 
 ---
 
@@ -87,15 +134,14 @@ docker-compose exec backend python seed.py
 
 ```
 SAR/
-├── docker-compose.yml
-├── .env.example
+├── streamlit_app.py          # Streamlit compliance UI (Streamlit Cloud)
+├── requirements.txt          # Streamlit app dependencies
 ├── README.md
 ├── backend/
-│   ├── Dockerfile
-│   ├── requirements.txt
 │   ├── alembic.ini
+│   ├── requirements.txt      # FastAPI backend dependencies
+│   ├── seed.py
 │   ├── alembic/
-│   │   ├── env.py
 │   │   └── versions/
 │   │       └── 001_initial_schema.py
 │   ├── app/
@@ -109,10 +155,8 @@ SAR/
 │   │   ├── middleware/
 │   │   ├── prompts/
 │   │   └── utils/
-│   ├── tests/
-│   └── seed.py
+│   └── tests/
 └── frontend/
-    ├── Dockerfile
     ├── package.json
     ├── next.config.js
     ├── tailwind.config.ts
@@ -130,18 +174,18 @@ SAR/
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| POST | /api/auth/login | JWT authentication | Public |
-| POST | /api/auth/register | User registration | Admin |
-| GET | /api/cases | List cases | Analyst+ |
-| POST | /api/cases | Create case | Analyst+ |
-| GET | /api/cases/{id} | Get case detail | Analyst+ |
-| POST | /api/cases/{id}/transactions | Add transactions | Analyst+ |
-| POST | /api/cases/{id}/generate-sar | Generate SAR narrative | Analyst+ |
-| GET | /api/cases/{id}/narrative | Get active narrative | Analyst+ |
-| POST | /api/overrides | Submit override | Analyst+ |
-| PATCH | /api/overrides/{id}/approve | Approve override | Supervisor+ |
-| GET | /api/audit/{case_id} | Get audit trail | Supervisor+ |
-| GET | /api/audit/{case_id}/timeline | Change history | Supervisor+ |
+| POST | `/api/auth/login` | JWT authentication | Public |
+| POST | `/api/auth/register` | User registration | Admin |
+| GET | `/api/cases` | List cases | Analyst+ |
+| POST | `/api/cases` | Create case | Analyst+ |
+| GET | `/api/cases/{id}` | Get case detail | Analyst+ |
+| POST | `/api/cases/{id}/transactions` | Add transactions | Analyst+ |
+| POST | `/api/cases/{id}/generate-sar` | Generate SAR narrative | Analyst+ |
+| GET | `/api/cases/{id}/narrative` | Get active narrative | Analyst+ |
+| POST | `/api/overrides` | Submit override | Analyst+ |
+| PATCH | `/api/overrides/{id}/approve` | Approve override | Supervisor+ |
+| GET | `/api/audit/{case_id}` | Get audit trail | Supervisor+ |
+| GET | `/api/audit/{case_id}/timeline` | Change history | Supervisor+ |
 
 ---
 
@@ -152,9 +196,9 @@ SAR/
    - Supporting evidence reference
    - Sentence hash comparison
 
-2. **HIGH/CRITICAL severity** additionally require:
+2. **HIGH / CRITICAL severity** additionally require:
    - Supervisor approval before activation
-   - Analyst cannot approve own override
+   - Analyst cannot approve their own override
 
 3. **All changes** are:
    - Logged immutably with append-only writes
@@ -165,39 +209,40 @@ SAR/
 
 ## Security
 
-- JWT token authentication with configurable expiry
-- bcrypt password hashing (12 rounds)
-- Strict CORS policy (configured origins only)
-- Pydantic input validation on all endpoints
-- Prompt injection prevention in LLM calls
-- Case-level data isolation enforced at query level
-- Role-based middleware on every protected route
+- JWT token authentication with configurable expiry  
+- bcrypt password hashing (12 rounds)  
+- Strict CORS policy (configured origins only)  
+- Pydantic input validation on all endpoints  
+- Prompt injection prevention in LLM calls  
+- Case-level data isolation enforced at query level  
+- Role-based middleware on every protected route  
 
 ---
 
 ## Testing
 
 ```bash
-# Run backend tests
-docker-compose exec backend pytest tests/ -v
+cd backend
 
-# Run specific test module
-docker-compose exec backend pytest tests/test_sar_generation.py -v
+# Run all tests
+pytest tests/ -v
+
+# Run a specific module
+pytest tests/test_sar_generation.py -v
 ```
 
 ---
 
 ## Environment Variables
 
-See `.env.example` for all required configuration. Critical variables:
-
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | PostgreSQL async connection string |
+| `DATABASE_URL` | PostgreSQL async connection string (Supabase) |
 | `JWT_SECRET_KEY` | 256-bit secret for token signing |
-| `OPENAI_API_KEY` | LLM provider API key |
-| `LLM_MODEL_NAME` | Model identifier (gpt-4, etc.) |
-| `LLM_TEMPERATURE` | Generation temperature (0.2 recommended) |
+| `GROQ_API_KEY` | Groq API key (primary LLM provider) |
+| `OPENAI_API_KEY` | OpenAI API key (fallback LLM provider) |
+| `GROQ_MODEL_NAME` | Model name (default: `llama-3.3-70b-versatile`) |
+| `LLM_TEMPERATURE` | Generation temperature (default: `0.2`) |
 | `CORS_ORIGINS` | Allowed frontend origins |
 
 ---

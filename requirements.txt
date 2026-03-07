@@ -1,0 +1,6 @@
+# SAR Narrative Generator — Streamlit Cloud dependencies
+streamlit>=1.35.0
+langchain>=0.2.5
+langchain-groq>=0.1.6
+langchain-openai>=0.1.8
+pandas>=2.2.0

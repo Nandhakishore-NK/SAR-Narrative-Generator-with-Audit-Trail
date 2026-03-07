@@ -41,24 +41,51 @@ from app.prompts.sar_system_prompt import build_system_prompt
 
 # ------- LLM Client Setup -------
 try:
-    from langchain_openai import ChatOpenAI
+    from langchain_groq import ChatGroq
     from langchain.schema import SystemMessage, HumanMessage
 
     LANGCHAIN_AVAILABLE = True
 except ImportError:
-    LANGCHAIN_AVAILABLE = False
+    try:
+        from langchain_openai import ChatOpenAI
+        from langchain.schema import SystemMessage, HumanMessage
+
+        LANGCHAIN_AVAILABLE = True
+    except ImportError:
+        LANGCHAIN_AVAILABLE = False
 
 
 def _get_llm():
-    """Initialize LangChain LLM with deterministic temperature."""
+    """Initialize LangChain LLM — prefers Groq, falls back to OpenAI."""
     if not LANGCHAIN_AVAILABLE:
         return None
-    return ChatOpenAI(
-        model=settings.LLM_MODEL_NAME,
-        temperature=settings.LLM_TEMPERATURE,
-        openai_api_key=settings.OPENAI_API_KEY,
-        max_tokens=4096,
-    )
+
+    # Prefer Groq if key is available
+    if settings.GROQ_API_KEY:
+        try:
+            return ChatGroq(
+                model=settings.GROQ_MODEL_NAME,
+                temperature=settings.LLM_TEMPERATURE,
+                groq_api_key=settings.GROQ_API_KEY,
+                max_tokens=4096,
+            )
+        except Exception:
+            pass
+
+    # Fallback to OpenAI
+    if settings.OPENAI_API_KEY:
+        try:
+            from langchain_openai import ChatOpenAI
+            return ChatOpenAI(
+                model=settings.LLM_MODEL_NAME,
+                temperature=settings.LLM_TEMPERATURE,
+                openai_api_key=settings.OPENAI_API_KEY,
+                max_tokens=4096,
+            )
+        except Exception:
+            pass
+
+    return None
 
 
 def _determine_severity(
@@ -207,7 +234,7 @@ account_summary:
   account_type: {case.account_type or 'NOT PROVIDED'}
   open_date: {case.account_open_date.isoformat() if case.account_open_date else 'NOT PROVIDED'}
   balance: {case.account_balance if case.account_balance is not None else 'NOT PROVIDED'}
-  currency: {case.account_currency or 'USD'}
+  currency: {case.account_currency or 'INR'}
 
 alert_metadata:
   alert_id: {case.alert_id or 'NOT PROVIDED'}
@@ -430,11 +457,11 @@ Risk Rating: {case.customer_risk_rating or 'Not assessed'}
 
 ## 2. Summary of Suspicious Activity
 
-This report documents potentially suspicious financial activity identified in connection with the above-referenced customer. The activity was flagged by alert {case.alert_id or 'N/A'} on {case.alert_date.strftime('%Y-%m-%d') if case.alert_date else 'date not available'}. A total of {len(transactions)} transaction(s) aggregating {case.account_currency or 'USD'} {total_amount:,.2f} were analyzed. {len(breached)} rule trigger(s) were found to have breached established thresholds.
+This report documents potentially suspicious financial activity identified in connection with the above-referenced customer. The activity was flagged by alert {case.alert_id or 'N/A'} on {case.alert_date.strftime('%Y-%m-%d') if case.alert_date else 'date not available'}. A total of {len(transactions)} transaction(s) aggregating {case.account_currency or 'INR'} {total_amount:,.2f} were analyzed. {len(breached)} rule trigger(s) were found to have breached established thresholds.
 
 ## 3. Detailed Transaction Pattern Analysis
 
-The review period encompasses {len(transactions)} transactions. The total value of transactions under review is {case.account_currency or 'USD'} {total_amount:,.2f}. Transactions involve counterparties across {len(countries)} jurisdiction(s): {', '.join(countries) if countries else 'domestic only'}.
+The review period encompasses {len(transactions)} transactions. The total value of transactions under review is {case.account_currency or 'INR'} {total_amount:,.2f}. Transactions involve counterparties across {len(countries)} jurisdiction(s): {', '.join(countries) if countries else 'domestic only'}.
 
 """
     if transactions:
@@ -505,7 +532,7 @@ Based on the available evidence, the activity associated with customer {case.cus
 async def generate_sar(
     db: AsyncSession,
     case_id: uuid.UUID,
-    user_id: uuid.UUID,
+    user_id: str = "system",
     analyst_role: str = "analyst",
 ) -> Tuple[SarNarrative, AuditTrail]:
     """
@@ -572,7 +599,7 @@ async def generate_sar(
     narrative_text = ""
     audit_json = {}
 
-    if llm and settings.OPENAI_API_KEY:
+    if llm and (settings.GROQ_API_KEY or settings.OPENAI_API_KEY):
         try:
             system_prompt = build_system_prompt(analyst_role)
             case_data_prompt = _build_case_data_prompt(case, transactions, rule_triggers, rag_docs)
@@ -591,6 +618,12 @@ async def generate_sar(
         # LLM not available — use template
         narrative_text = _generate_fallback_narrative(case, transactions, rule_triggers, severity)
 
+    # Parse user_id as UUID if possible, else None
+    try:
+        parsed_user_id = uuid.UUID(user_id)
+    except (ValueError, TypeError):
+        parsed_user_id = None
+
     # 7. Create narrative record
     narrative = SarNarrative(
         case_id=case_id,
@@ -598,7 +631,7 @@ async def generate_sar(
         version=new_version,
         severity=severity,
         is_active=True,
-        created_by=user_id,
+        created_by=parsed_user_id,
     )
     db.add(narrative)
     await db.flush()  # Get assigned ID

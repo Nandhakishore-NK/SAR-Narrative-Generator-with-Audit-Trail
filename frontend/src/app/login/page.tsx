@@ -1,6 +1,6 @@
 /**
- * Login page — /login
- * Bank-grade minimal aesthetic. Email + password form.
+ * Login / Sign-up page — /login
+ * Uses Supabase Auth. No email verification required.
  */
 
 "use client";
@@ -24,9 +24,11 @@ import { ShieldCheck, AlertCircle } from "lucide-react";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, signup } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,13 +40,21 @@ export default function LoginPage() {
       return;
     }
 
+    if (isSignUp && password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await login(email, password);
+      if (isSignUp) {
+        await signup({ email, password, name: name || undefined });
+      } else {
+        await login({ email, password });
+      }
       router.push("/dashboard");
     } catch (err: any) {
-      const msg =
-        err?.response?.data?.detail || "Invalid credentials. Please try again.";
+      const msg = err?.message || "Authentication failed. Please try again.";
       setError(msg);
     } finally {
       setLoading(false);
@@ -65,12 +75,16 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Login Card */}
+        {/* Auth Card */}
         <Card className="shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-xl">Sign in</CardTitle>
+            <CardTitle className="text-xl">
+              {isSignUp ? "Create account" : "Sign in"}
+            </CardTitle>
             <CardDescription>
-              Enter your credentials to access the platform.
+              {isSignUp
+                ? "Enter your details to create a new account."
+                : "Enter your credentials to access the platform."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -83,13 +97,29 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {/* Name (sign-up only) */}
+              {isSignUp && (
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    autoComplete="name"
+                    disabled={loading}
+                  />
+                </div>
+              )}
+
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="analyst@sarguardian.com"
+                  placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
@@ -107,7 +137,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
                   disabled={loading}
                 />
               </div>
@@ -117,29 +147,47 @@ export default function LoginPage() {
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <Spinner size="sm" className="text-primary-foreground" />
-                    Signing in…
+                    {isSignUp ? "Creating account…" : "Signing in…"}
                   </span>
+                ) : isSignUp ? (
+                  "Create account"
                 ) : (
                   "Sign in"
                 )}
               </Button>
             </form>
 
-            {/* Demo Credentials Hint */}
-            <div className="mt-6 rounded-lg bg-muted p-3 text-xs text-muted-foreground space-y-1">
-              <p className="font-semibold">Demo Credentials:</p>
-              <p>
-                <span className="font-medium">Admin:</span>{" "}
-                admin@sarguardian.com / admin123
-              </p>
-              <p>
-                <span className="font-medium">Supervisor:</span>{" "}
-                supervisor@sarguardian.com / super123
-              </p>
-              <p>
-                <span className="font-medium">Analyst:</span>{" "}
-                analyst@sarguardian.com / analyst123
-              </p>
+            {/* Toggle sign-in / sign-up */}
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              {isSignUp ? (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    className="text-primary underline-offset-4 hover:underline font-medium"
+                    onClick={() => {
+                      setIsSignUp(false);
+                      setError(null);
+                    }}
+                  >
+                    Sign in
+                  </button>
+                </>
+              ) : (
+                <>
+                  Don&apos;t have an account?{" "}
+                  <button
+                    type="button"
+                    className="text-primary underline-offset-4 hover:underline font-medium"
+                    onClick={() => {
+                      setIsSignUp(true);
+                      setError(null);
+                    }}
+                  >
+                    Sign up
+                  </button>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>

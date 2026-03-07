@@ -25,6 +25,8 @@ if not _is_sqlite:
         "pool_pre_ping": True,
         "pool_recycle": 3600,
     })
+    # Supabase / PgBouncer compatibility: disable prepared statement caching
+    _engine_kwargs["connect_args"] = {"prepared_statement_cache_size": 0}
 
 engine = create_async_engine(settings.DATABASE_URL, **_engine_kwargs)
 

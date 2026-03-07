@@ -8,7 +8,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -52,7 +51,6 @@ const STATUS_OPTIONS = [
 const PAGE_SIZE = 20;
 
 export default function CasesPage() {
-  const { user, token } = useAuth();
   const router = useRouter();
 
   const [cases, setCases] = useState<Case[]>([]);
@@ -63,12 +61,8 @@ export default function CasesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      router.push("/login");
-      return;
-    }
     fetchCases();
-  }, [token, page, statusFilter]);
+  }, [page, statusFilter]);
 
   const fetchCases = async () => {
     setLoading(true);
@@ -89,8 +83,6 @@ export default function CasesPage() {
       setLoading(false);
     }
   };
-
-  if (!user) return null;
 
   const filteredCases = search
     ? cases.filter(
@@ -123,14 +115,12 @@ export default function CasesPage() {
               Manage and monitor all SAR cases.
             </p>
           </div>
-          {(user.role === "admin" || user.role === "analyst") && (
-            <Link href="/cases/new">
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                New Case
-              </Button>
-            </Link>
-          )}
+          <Link href="/cases/new">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Case
+            </Button>
+          </Link>
         </div>
 
         {/* Filters */}

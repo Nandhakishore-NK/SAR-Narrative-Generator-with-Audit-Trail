@@ -1,13 +1,5 @@
 """
 SAR Generation API — Endpoint for generating SAR narratives.
-
-Triggers the LLM-powered SAR engine which:
-1. Assembles all case data
-2. Retrieves regulatory guidance via RAG
-3. Generates narrative with evidence mapping
-4. Hashes each sentence
-5. Creates complete audit trail
-6. Logs everything immutably
 """
 
 from uuid import UUID
@@ -22,20 +14,19 @@ from app.database import get_db
 from app.models.case import Case
 from app.models.sar_narrative import SarNarrative
 from app.models.narrative_sentence import NarrativeSentence
-from app.models.user import User
 from app.schemas.sar import SarGenerateRequest, SarNarrativeResponse, SentenceBreakdown, AuditTrailResponse
 from app.models.audit_trail import AuditTrail
-from app.middleware.role_guard import require_analyst
 from app.services.sar_engine import generate_sar
 
 router = APIRouter()
+
+SYSTEM_ACTOR = "system"
 
 
 @router.post("/generate", response_model=SarNarrativeResponse)
 async def generate_sar_narrative(
     request: SarGenerateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """
     Generate a SAR narrative for a case.
@@ -59,8 +50,8 @@ async def generate_sar_narrative(
         narrative, audit_trail = await generate_sar(
             db=db,
             case_id=request.case_id,
-            user_id=current_user.id,
-            analyst_role=current_user.role.value,
+            user_id=SYSTEM_ACTOR,
+            analyst_role="analyst",
         )
     except ValueError as e:
         raise HTTPException(
@@ -114,7 +105,6 @@ async def generate_sar_narrative(
 async def get_active_narrative(
     case_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """Get the currently active SAR narrative for a case."""
     result = await db.execute(
@@ -169,7 +159,6 @@ async def get_active_narrative(
 async def get_case_audit_trails(
     case_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """Get all audit trail records for a case."""
     result = await db.execute(

@@ -1,10 +1,5 @@
 """
 Audit API — Audit trail and immutable log query endpoints.
-
-Provides:
-- Full audit trail JSON for a case
-- Immutable log timeline with hash chain verification
-- Change history for compliance review
 """
 
 from uuid import UUID
@@ -16,10 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models.audit_trail import AuditTrail
 from app.models.immutable_log import ImmutableLog
-from app.models.user import User
 from app.schemas.audit import AuditTimelineEntry, AuditTimelineResponse
 from app.schemas.sar import AuditTrailResponse
-from app.middleware.role_guard import require_supervisor
 from app.services.audit_service import get_case_timeline, verify_case_chain
 
 router = APIRouter()
@@ -29,7 +22,6 @@ router = APIRouter()
 async def get_audit_trail(
     case_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_supervisor),
 ):
     """
     Get all structured audit trail records for a case.
@@ -55,7 +47,6 @@ async def get_audit_trail(
 async def get_audit_timeline(
     case_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_supervisor),
 ):
     """
     Get the immutable log timeline for a case with hash chain verification.

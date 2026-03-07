@@ -8,7 +8,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,6 @@ import {
 import { ArrowLeft, AlertCircle, Save } from "lucide-react";
 
 export default function NewCasePage() {
-  const { user, token } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,14 +41,17 @@ export default function NewCasePage() {
     customer_id: "",
     customer_type: "individual",
     account_type: "",
-    jurisdiction: "",
-    occupation: "",
-    kyc_status: "verified",
-    pep_status: false,
-    alert_typology: "",
-    alert_triggered_date: "",
-    overall_risk_score: "",
-    case_narrative_summary: "",
+    kyc_country: "",
+    kyc_occupation: "",
+    kyc_id_type: "passport",
+    kyc_id_number: "",
+    account_number: "",
+    alert_id: "",
+    alert_type: "",
+    alert_date: "",
+    alert_score: "",
+    composite_risk_score: "",
+    notes: "",
   });
 
   const updateField = (field: string, value: any) => {
@@ -70,10 +71,11 @@ export default function NewCasePage() {
     try {
       const payload = {
         ...form,
-        overall_risk_score: form.overall_risk_score
-          ? Number(form.overall_risk_score)
+        composite_risk_score: form.composite_risk_score
+          ? Number(form.composite_risk_score)
           : null,
-        alert_triggered_date: form.alert_triggered_date || null,
+        alert_score: form.alert_score ? Number(form.alert_score) : null,
+        alert_date: form.alert_date || null,
       };
       const res = await api.post("/cases/", payload);
       router.push(`/cases/${res.data.id}`);
@@ -85,8 +87,6 @@ export default function NewCasePage() {
       setLoading(false);
     }
   };
-
-  if (!user) return null;
 
   return (
     <>
@@ -136,7 +136,7 @@ export default function NewCasePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customer_id">Customer ID</Label>
+                <Label htmlFor="customer_id">Customer ID *</Label>
                 <Input
                   id="customer_id"
                   value={form.customer_id}
@@ -163,41 +163,61 @@ export default function NewCasePage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="occupation">Occupation</Label>
+                <Label htmlFor="kyc_occupation">Occupation</Label>
                 <Input
-                  id="occupation"
-                  value={form.occupation}
-                  onChange={(e) => updateField("occupation", e.target.value)}
+                  id="kyc_occupation"
+                  value={form.kyc_occupation}
+                  onChange={(e) => updateField("kyc_occupation", e.target.value)}
                   placeholder="Stated occupation"
                   disabled={loading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="jurisdiction">Jurisdiction</Label>
+                <Label htmlFor="kyc_country">KYC Country</Label>
                 <Input
-                  id="jurisdiction"
-                  value={form.jurisdiction}
-                  onChange={(e) => updateField("jurisdiction", e.target.value)}
+                  id="kyc_country"
+                  value={form.kyc_country}
+                  onChange={(e) => updateField("kyc_country", e.target.value)}
                   placeholder="e.g., US, IN, UK"
                   disabled={loading}
                 />
               </div>
               <div className="space-y-2">
-                <Label>KYC Status</Label>
+                <Label>KYC ID Type</Label>
                 <Select
-                  value={form.kyc_status}
-                  onValueChange={(v) => updateField("kyc_status", v)}
+                  value={form.kyc_id_type}
+                  onValueChange={(v) => updateField("kyc_id_type", v)}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="verified">Verified</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="expired">Expired</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
+                    <SelectItem value="passport">Passport</SelectItem>
+                    <SelectItem value="drivers_license">Drivers License</SelectItem>
+                    <SelectItem value="national_id">National ID</SelectItem>
+                    <SelectItem value="corporate_reg">Corporate Registration</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="kyc_id_number">KYC ID Number</Label>
+                <Input
+                  id="kyc_id_number"
+                  value={form.kyc_id_number}
+                  onChange={(e) => updateField("kyc_id_number", e.target.value)}
+                  placeholder="ID document number"
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="account_number">Account Number</Label>
+                <Input
+                  id="account_number"
+                  value={form.account_number}
+                  onChange={(e) => updateField("account_number", e.target.value)}
+                  placeholder="Bank account number"
+                  disabled={loading}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="account_type">Account Type</Label>
@@ -208,19 +228,6 @@ export default function NewCasePage() {
                   placeholder="e.g., Savings, Current, Corporate"
                   disabled={loading}
                 />
-              </div>
-              <div className="space-y-2 flex items-end gap-2">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="pep_status"
-                    checked={form.pep_status}
-                    onChange={(e) => updateField("pep_status", e.target.checked)}
-                    className="h-4 w-4 rounded border-input"
-                    disabled={loading}
-                  />
-                  <Label htmlFor="pep_status">Politically Exposed Person (PEP)</Label>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -235,39 +242,60 @@ export default function NewCasePage() {
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="alert_typology">Alert Typology</Label>
+                <Label htmlFor="alert_id">Alert ID</Label>
                 <Input
-                  id="alert_typology"
-                  value={form.alert_typology}
-                  onChange={(e) => updateField("alert_typology", e.target.value)}
+                  id="alert_id"
+                  value={form.alert_id}
+                  onChange={(e) => updateField("alert_id", e.target.value)}
+                  placeholder="Alert reference ID"
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="alert_type">Alert Type</Label>
+                <Input
+                  id="alert_type"
+                  value={form.alert_type}
+                  onChange={(e) => updateField("alert_type", e.target.value)}
                   placeholder="e.g., Structuring, Layering, Smurfing"
                   disabled={loading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="alert_triggered_date">Alert Triggered Date</Label>
+                <Label htmlFor="alert_date">Alert Date</Label>
                 <Input
-                  id="alert_triggered_date"
+                  id="alert_date"
                   type="date"
-                  value={form.alert_triggered_date}
-                  onChange={(e) =>
-                    updateField("alert_triggered_date", e.target.value)
-                  }
+                  value={form.alert_date}
+                  onChange={(e) => updateField("alert_date", e.target.value)}
                   disabled={loading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="overall_risk_score">
-                  Overall Risk Score (0–100)
-                </Label>
+                <Label htmlFor="alert_score">Alert Score (0–100)</Label>
                 <Input
-                  id="overall_risk_score"
+                  id="alert_score"
                   type="number"
                   min={0}
                   max={100}
-                  value={form.overall_risk_score}
+                  value={form.alert_score}
+                  onChange={(e) => updateField("alert_score", e.target.value)}
+                  placeholder="0-100"
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="composite_risk_score">
+                  Composite Risk Score (0–100)
+                </Label>
+                <Input
+                  id="composite_risk_score"
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={form.composite_risk_score}
                   onChange={(e) =>
-                    updateField("overall_risk_score", e.target.value)
+                    updateField("composite_risk_score", e.target.value)
                   }
                   placeholder="0-100"
                   disabled={loading}
@@ -276,22 +304,18 @@ export default function NewCasePage() {
             </CardContent>
           </Card>
 
-          {/* Summary */}
+          {/* Notes */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Case Summary</CardTitle>
+              <CardTitle className="text-lg">Case Notes</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="case_narrative_summary">
-                  Initial Narrative Summary
-                </Label>
+                <Label htmlFor="notes">Notes</Label>
                 <Textarea
-                  id="case_narrative_summary"
-                  value={form.case_narrative_summary}
-                  onChange={(e) =>
-                    updateField("case_narrative_summary", e.target.value)
-                  }
+                  id="notes"
+                  value={form.notes}
+                  onChange={(e) => updateField("notes", e.target.value)}
                   placeholder="Brief summary of the suspicious activity…"
                   rows={4}
                   disabled={loading}

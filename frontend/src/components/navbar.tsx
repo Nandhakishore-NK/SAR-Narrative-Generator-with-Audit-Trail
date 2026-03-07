@@ -1,5 +1,5 @@
 /**
- * Navbar — Top navigation bar for authenticated pages.
+ * Navbar — Top navigation bar.
  */
 
 "use client";
@@ -28,12 +28,9 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
+  const handleLogout = async () => {
+    await logout();
   };
-
-  if (!user) return null;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -69,16 +66,20 @@ export function Navbar() {
 
         {/* User Info + Logout */}
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{user.name}</span>
-            <Badge variant="outline" className="capitalize text-xs">
-              {user.role}
-            </Badge>
-          </div>
-          <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
-            <LogOut className="h-4 w-4" />
-          </Button>
+          {user && (
+            <div className="hidden sm:flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">{user.name}</span>
+              <Badge variant="outline" className="capitalize text-xs">
+                {user.role}
+              </Badge>
+            </div>
+          )}
+          {user && (
+            <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
     </header>

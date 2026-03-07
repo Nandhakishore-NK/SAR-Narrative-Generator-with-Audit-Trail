@@ -13,10 +13,13 @@ class Settings(BaseSettings):
     Every deployment-sensitive value is externalized.
     """
 
-    # ------- Database -------
-    DATABASE_URL: str = "sqlite+aiosqlite:///./sar_guardian.db"
+    # ------- Database (Supabase PostgreSQL) -------
+    DATABASE_URL: str = "postgresql+asyncpg://postgres.amrkoaquuvscbzmqxgtm:SARSupabase@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres"
     # Synchronous URL for Alembic migrations
-    DATABASE_URL_SYNC: str = "sqlite:///./sar_guardian.db"
+    DATABASE_URL_SYNC: str = "postgresql://postgres.amrkoaquuvscbzmqxgtm:SARSupabase@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres"
+
+    # ------- Supabase -------
+    SUPABASE_URL: str = "https://amrkoaquuvscbzmqxgtm.supabase.co"
 
     # ------- JWT Authentication -------
     JWT_SECRET_KEY: str = "replace-with-256-bit-secret"
@@ -25,7 +28,9 @@ class Settings(BaseSettings):
 
     # ------- LLM Configuration -------
     OPENAI_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
     LLM_MODEL_NAME: str = "gpt-4"
+    GROQ_MODEL_NAME: str = "llama-3.3-70b-versatile"
     LLM_TEMPERATURE: float = 0.2
 
     # ------- Redis -------
@@ -37,11 +42,12 @@ class Settings(BaseSettings):
     # ------- Application -------
     APP_ENV: str = "production"
     LOG_LEVEL: str = "INFO"
-    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
     class Config:
-        env_file = ".env"
+        env_file = "../.env"
         case_sensitive = True
+        extra = "ignore"
 
 
 settings = Settings()

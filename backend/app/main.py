@@ -55,7 +55,7 @@ app.add_middleware(
 # ------- API Route Registration -------
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(cases.router, prefix="/api/cases", tags=["Cases"])
-app.include_router(transactions.router, prefix="/api/transactions", tags=["Transactions"])
+app.include_router(transactions.router, prefix="/api", tags=["Transactions"])
 app.include_router(sar_generation.router, prefix="/api/sar", tags=["SAR Generation"])
 app.include_router(overrides.router, prefix="/api/overrides", tags=["Overrides"])
 app.include_router(audit.router, prefix="/api/audit", tags=["Audit Trail"])

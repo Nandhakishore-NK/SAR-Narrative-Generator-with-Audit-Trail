@@ -24,6 +24,7 @@ SAR Guardian is a full-stack Financial Crime Compliance application that generat
 | Database | PostgreSQL via Supabase |
 | Auth | JWT + bcrypt |
 | LLM | Groq (`llama-3.3-70b-versatile`) · OpenAI (`gpt-4o`) fallback |
+| RAG | In-memory TF-IDF retrieval (regulatory templates, typology docs) |
 | LLM Orchestration | LangChain |
 | Next.js Frontend | Next.js 14, TypeScript, TailwindCSS, shadcn/ui |
 
@@ -44,6 +45,14 @@ SAR Guardian is a full-stack Financial Crime Compliance application that generat
 - No legal conclusions — regulator-safe language only
 - No discriminatory language — suspicion based solely on financial behaviour
 - Prompt injection prevention in all LLM calls
+
+### Sample Typologies Covered
+
+1. **STRUCTURING** — 47 transfers from different accounts in 7 days, all near ₹9,999
+2. **HIGH_RISK_JURISDICTION** — PEP customer sending ₹1.75 Cr through BVI/Cyprus shell companies
+3. **RAPID_MOVEMENT** — ₹29L received and re-sent within 24–48 hours, partial crypto conversion
+4. **MULE_ACCOUNT** — Student account receiving ₹82L (8x annual income) with immediate ATM withdrawals
+5. **TRADE_BASED_ML** — Invoice values 340% above market rate; payment routed India → UAE → Nigeria
 
 ---
 
@@ -179,11 +188,18 @@ SAR/
 | GET | `/api/cases` | List cases | Analyst+ |
 | POST | `/api/cases` | Create case | Analyst+ |
 | GET | `/api/cases/{id}` | Get case detail | Analyst+ |
-| POST | `/api/cases/{id}/transactions` | Add transactions | Analyst+ |
-| POST | `/api/cases/{id}/generate-sar` | Generate SAR narrative | Analyst+ |
-| GET | `/api/cases/{id}/narrative` | Get active narrative | Analyst+ |
+| PATCH | `/api/cases/{id}` | Update case status | Analyst+ |
+| POST | `/api/cases/{id}/transactions` | Bulk-add transactions | Analyst+ |
+| GET | `/api/cases/{id}/transactions` | List transactions | Analyst+ |
+| POST | `/api/cases/{id}/rule-triggers` | Add rule trigger | Analyst+ |
+| GET | `/api/cases/{id}/rule-triggers` | List rule triggers | Analyst+ |
+| POST | `/api/sar/generate` | Generate SAR narrative | Analyst+ |
+| GET | `/api/sar/cases/{id}/narrative` | Get active narrative | Analyst+ |
+| GET | `/api/sar/cases/{id}/audit` | SAR generation audit log | Analyst+ |
 | POST | `/api/overrides` | Submit override | Analyst+ |
 | PATCH | `/api/overrides/{id}/approve` | Approve override | Supervisor+ |
+| GET | `/api/overrides/sentence/{id}` | Get overrides for a sentence | Analyst+ |
+| GET | `/api/overrides/pending` | List pending approvals | Supervisor+ |
 | GET | `/api/audit/{case_id}` | Get audit trail | Supervisor+ |
 | GET | `/api/audit/{case_id}/timeline` | Change history | Supervisor+ |
 
@@ -231,19 +247,35 @@ pytest tests/ -v
 pytest tests/test_sar_generation.py -v
 ```
 
+### Test Modules
+
+| File | What it validates |
+|------|-------------------|
+| `test_sar_generation.py` | Fallback narrative, severity scoring, sentence parsing, data-gap detection |
+| `test_hash_integrity.py` | SHA-256 hash chaining on immutable audit log entries |
+| `test_override_validation.py` | Override reason codes, evidence requirements, approval workflow |
+| `test_role_enforcement.py` | RBAC boundaries — read-only/analyst/supervisor/admin access rules |
+
 ---
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL async connection string (Supabase) |
-| `JWT_SECRET_KEY` | 256-bit secret for token signing |
-| `GROQ_API_KEY` | Groq API key (primary LLM provider) |
-| `OPENAI_API_KEY` | OpenAI API key (fallback LLM provider) |
-| `GROQ_MODEL_NAME` | Model name (default: `llama-3.3-70b-versatile`) |
-| `LLM_TEMPERATURE` | Generation temperature (default: `0.2`) |
-| `CORS_ORIGINS` | Allowed frontend origins |
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL async connection string (Supabase) | — |
+| `DATABASE_URL_SYNC` | Synchronous PostgreSQL URL for Alembic migrations | — |
+| `SUPABASE_URL` | Supabase project URL | — |
+| `JWT_SECRET_KEY` | 256-bit secret for token signing | `replace-with-256-bit-secret` |
+| `JWT_ALGORITHM` | JWT signing algorithm | `HS256` |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | Token lifetime in minutes | `60` |
+| `GROQ_API_KEY` | Groq API key (primary LLM provider) | — |
+| `OPENAI_API_KEY` | OpenAI API key (fallback LLM provider) | — |
+| `GROQ_MODEL_NAME` | Groq model name | `llama-3.3-70b-versatile` |
+| `LLM_MODEL_NAME` | OpenAI model name | `gpt-4` |
+| `LLM_TEMPERATURE` | Generation temperature | `0.2` |
+| `REDIS_URL` | Redis connection string (for caching) | `redis://redis:6379/0` |
+| `APP_ENV` | Deployment environment (`production` hides `/docs`) | `production` |
+| `CORS_ORIGINS` | Comma-separated allowed frontend origins | `http://localhost:3000` |
 
 ---
 

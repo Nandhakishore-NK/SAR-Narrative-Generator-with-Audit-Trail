@@ -6,9 +6,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -48,19 +46,13 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
-  const { user, token } = useAuth();
-  const router = useRouter();
   const [cases, setCases] = useState<Case[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      router.push("/login");
-      return;
-    }
     fetchDashboardData();
-  }, [token]);
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
@@ -83,8 +75,6 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
-
-  if (!user) return null;
 
   if (loading) {
     return (
@@ -161,7 +151,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
-            Welcome back, {user.name}. Here&apos;s your compliance overview.
+            Here&apos;s your compliance overview.
           </p>
         </div>
 

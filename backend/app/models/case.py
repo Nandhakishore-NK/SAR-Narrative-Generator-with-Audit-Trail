@@ -47,7 +47,7 @@ class Case(Base):
     account_type: Mapped[str] = mapped_column(String(50), nullable=True)
     account_open_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     account_balance: Mapped[float] = mapped_column(nullable=True)
-    account_currency: Mapped[str] = mapped_column(String(10), nullable=True, default="USD")
+    account_currency: Mapped[str] = mapped_column(String(10), nullable=True, default="INR")
 
     # Alert metadata
     alert_id: Mapped[str] = mapped_column(String(100), nullable=True, index=True)

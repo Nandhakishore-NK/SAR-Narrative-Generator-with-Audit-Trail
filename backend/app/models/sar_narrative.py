@@ -7,6 +7,7 @@ All versions are retained for audit history.
 
 import uuid
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy import String, Text, Integer, Boolean, DateTime, ForeignKey, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -28,8 +29,8 @@ class SarNarrative(Base):
     severity: Mapped[str] = mapped_column(String(20), nullable=False, default="MEDIUM")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
-    created_by: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+    created_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

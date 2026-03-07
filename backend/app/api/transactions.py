@@ -18,13 +18,13 @@ from app.database import get_db
 from app.models.case import Case
 from app.models.transaction import Transaction
 from app.models.rule_trigger import RuleTrigger
-from app.models.user import User
 from app.schemas.transaction import TransactionCreate, TransactionBulkCreate, TransactionResponse
 from app.schemas.rule_trigger import RuleTriggerCreate, RuleTriggerBulkCreate, RuleTriggerResponse
-from app.middleware.role_guard import require_analyst
 from app.services.audit_service import write_immutable_log
 
 router = APIRouter()
+
+SYSTEM_ACTOR = "system"
 
 
 @router.post(
@@ -36,7 +36,6 @@ async def add_transactions(
     case_id: UUID,
     payload: TransactionBulkCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """
     Bulk-add transactions to a case.
@@ -74,7 +73,7 @@ async def add_transactions(
         entity_type="case",
         entity_id=str(case_id),
         action="transactions_added",
-        actor_id=str(current_user.id),
+        actor_id=SYSTEM_ACTOR,
         details=f"Added {len(created)} transactions",
     )
 
@@ -85,7 +84,6 @@ async def add_transactions(
 async def get_case_transactions(
     case_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """Get all transactions for a case."""
     result = await db.execute(
@@ -106,7 +104,6 @@ async def add_rule_triggers(
     case_id: UUID,
     payload: RuleTriggerBulkCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """Bulk-add rule triggers to a case."""
     # Verify case exists
@@ -136,7 +133,7 @@ async def add_rule_triggers(
         entity_type="case",
         entity_id=str(case_id),
         action="rule_triggers_added",
-        actor_id=str(current_user.id),
+        actor_id=SYSTEM_ACTOR,
         details=f"Added {len(created)} rule triggers",
     )
 
@@ -147,7 +144,6 @@ async def add_rule_triggers(
 async def get_case_rule_triggers(
     case_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """Get all rule triggers for a case."""
     result = await db.execute(

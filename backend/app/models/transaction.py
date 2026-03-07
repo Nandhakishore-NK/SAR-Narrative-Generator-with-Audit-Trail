@@ -26,7 +26,7 @@ class Transaction(Base):
     # Transaction details
     transaction_ref: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
-    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="USD")
+    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="INR")
     transaction_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     transaction_type: Mapped[str] = mapped_column(String(50), nullable=True)  # wire, cash, ach, etc.
     direction: Mapped[str] = mapped_column(String(10), nullable=True)  # inbound / outbound

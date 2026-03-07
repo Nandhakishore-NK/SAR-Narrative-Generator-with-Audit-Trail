@@ -1,5 +1,5 @@
 """
-RAG Service — ChromaDB integration for regulatory template retrieval.
+RAG Service — In-memory keyword-based retrieval for regulatory templates.
 
 Stores and retrieves:
 - Regulatory guidance documents (FinCEN, FIU-IND, FATF)
@@ -13,74 +13,84 @@ Usage rules:
 - Retrieved content cannot override case-specific data
 """
 
-import os
+import math
+import re
 from typing import List, Dict, Optional
-
-try:
-    import chromadb
-    from chromadb.config import Settings as ChromaSettings
-    CHROMA_AVAILABLE = True
-except ImportError:
-    CHROMA_AVAILABLE = False
-
-from app.config import settings
+from collections import Counter
 
 
 class RAGService:
     """
-    Retrieval-Augmented Generation service using ChromaDB.
-    Provides regulatory context to the SAR generation engine.
+    Lightweight Retrieval-Augmented Generation service using TF-IDF similarity.
+    No external vector-store dependency (replaces ChromaDB).
     """
 
     def __init__(self):
-        self._client = None
-        self._collection = None
+        self._documents: Dict[str, Dict] = {}  # id -> {text, metadata}
+        self._idf: Dict[str, float] = {}
+        self._tfidf_vectors: Dict[str, Dict[str, float]] = {}
+        self._dirty = True  # rebuild index flag
 
-    def _get_client(self):
-        """Lazy initialization of ChromaDB client."""
-        if not CHROMA_AVAILABLE:
-            return None
-        if self._client is None:
-            self._client = chromadb.Client(ChromaSettings(
-                anonymized_telemetry=False,
-            ))
-        return self._client
+    @staticmethod
+    def _tokenize(text: str) -> List[str]:
+        """Split text into lowercase tokens."""
+        return re.findall(r"[a-z0-9]+", text.lower())
 
-    def _get_collection(self):
-        """Get or create the regulatory documents collection."""
-        client = self._get_client()
-        if client is None:
-            return None
-        if self._collection is None:
-            self._collection = client.get_or_create_collection(
-                name="regulatory_documents",
-                metadata={"description": "SAR templates and regulatory guidance"}
-            )
-        return self._collection
+    def _rebuild_index(self):
+        """Recompute IDF and per-document TF-IDF vectors."""
+        n_docs = len(self._documents)
+        if n_docs == 0:
+            self._idf = {}
+            self._tfidf_vectors = {}
+            self._dirty = False
+            return
+
+        # Document frequency
+        df: Dict[str, int] = Counter()
+        doc_tfs: Dict[str, Counter] = {}
+        for doc_id, doc in self._documents.items():
+            tokens = self._tokenize(doc["text"])
+            tf = Counter(tokens)
+            doc_tfs[doc_id] = tf
+            for term in set(tokens):
+                df[term] += 1
+
+        # IDF = log(N / df)
+        self._idf = {term: math.log((n_docs + 1) / (freq + 1)) + 1 for term, freq in df.items()}
+
+        # TF-IDF vectors
+        self._tfidf_vectors = {}
+        for doc_id, tf in doc_tfs.items():
+            total = sum(tf.values()) or 1
+            vec = {}
+            for term, count in tf.items():
+                vec[term] = (count / total) * self._idf.get(term, 0)
+            self._tfidf_vectors[doc_id] = vec
+
+        self._dirty = False
+
+    @staticmethod
+    def _cosine_sim(a: Dict[str, float], b: Dict[str, float]) -> float:
+        """Compute cosine similarity between two sparse vectors."""
+        common = set(a.keys()) & set(b.keys())
+        if not common:
+            return 0.0
+        dot = sum(a[k] * b[k] for k in common)
+        mag_a = math.sqrt(sum(v * v for v in a.values()))
+        mag_b = math.sqrt(sum(v * v for v in b.values()))
+        if mag_a == 0 or mag_b == 0:
+            return 0.0
+        return dot / (mag_a * mag_b)
 
     def add_document(
         self,
         doc_id: str,
         text: str,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ) -> bool:
-        """
-        Add a regulatory document to the vector store.
-        
-        Args:
-            doc_id: Unique document identifier (e.g., "FINCEN-SAR-TEMPLATE-001")
-            text: Document text content
-            metadata: Additional metadata (source, date, type)
-        """
-        collection = self._get_collection()
-        if collection is None:
-            return False
-
-        collection.add(
-            ids=[doc_id],
-            documents=[text],
-            metadatas=[metadata or {}],
-        )
+        """Add a regulatory document to the in-memory store."""
+        self._documents[doc_id] = {"text": text, "metadata": metadata or {}}
+        self._dirty = True
         return True
 
     def retrieve_guidance(
@@ -89,36 +99,47 @@ class RAGService:
         n_results: int = 3,
     ) -> List[Dict]:
         """
-        Retrieve relevant regulatory guidance for a given query.
-        
-        Returns list of documents with their IDs and metadata.
-        All retrieved document IDs must be logged in the audit trail.
+        Retrieve the most relevant regulatory documents for *query*.
+        Returns list of {document_id, text, metadata} sorted by relevance.
         """
-        collection = self._get_collection()
-        if collection is None:
+        if not self._documents:
             return []
 
-        try:
-            results = collection.query(
-                query_texts=[query],
-                n_results=n_results,
-            )
-        except Exception:
-            return []
+        if self._dirty:
+            self._rebuild_index()
 
-        documents = []
-        if results and results.get("ids"):
-            for i, doc_id in enumerate(results["ids"][0]):
-                documents.append({
-                    "document_id": doc_id,
-                    "text": results["documents"][0][i] if results.get("documents") else "",
-                    "metadata": results["metadatas"][0][i] if results.get("metadatas") else {},
-                })
-        return documents
+        # Build query TF-IDF vector using the corpus IDF
+        tokens = self._tokenize(query)
+        if not tokens:
+            return []
+        tf = Counter(tokens)
+        total = sum(tf.values()) or 1
+        q_vec = {term: (count / total) * self._idf.get(term, 1.0) for term, count in tf.items()}
+
+        # Score every document
+        scores = []
+        for doc_id, d_vec in self._tfidf_vectors.items():
+            sim = self._cosine_sim(q_vec, d_vec)
+            scores.append((sim, doc_id))
+
+        scores.sort(reverse=True)
+
+        results = []
+        for sim, doc_id in scores[:n_results]:
+            if sim <= 0:
+                break
+            doc = self._documents[doc_id]
+            results.append({
+                "document_id": doc_id,
+                "text": doc["text"],
+                "metadata": doc["metadata"],
+            })
+
+        return results
 
     def seed_default_templates(self) -> int:
         """
-        Seed the vector store with default regulatory templates.
+        Seed the store with default regulatory templates.
         Returns the number of documents seeded.
         """
         templates = [
@@ -180,3 +201,6 @@ class RAGService:
 
 # Singleton instance
 rag_service = RAGService()
+
+# Auto-seed on import so templates are always available
+rag_service.seed_default_templates()

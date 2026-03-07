@@ -55,6 +55,17 @@ export interface Case {
   network_risk_score?: number;
   behavioral_risk_score?: number;
   graph_analysis?: string;
+  overall_risk_score?: number;
+  alert_typology?: string;
+  // UI-referenced fields (mapped from backend equivalents)
+  kyc_status?: string;
+  pep_status?: boolean;
+  jurisdiction?: string;
+  occupation?: string;
+  alert_triggered_date?: string;
+  prior_sar_count?: number;
+  graph_connections_count?: number;
+  case_narrative_summary?: string;
   created_at: string;
   updated_at: string;
 }
@@ -85,6 +96,8 @@ export interface Transaction {
   counterparty_account?: string;
   counterparty_bank?: string;
   country?: string;
+  // Alias referenced in some UI components
+  counterparty_country?: string;
   purpose?: string;
   is_flagged: boolean;
   created_at: string;
@@ -106,6 +119,7 @@ export interface RuleTrigger {
 
 // ===== SAR Narrative =====
 export interface SentenceBreakdown {
+  id?: string;
   sentence_id: string;
   sentence_index: number;
   sentence_text: string;
@@ -116,6 +130,7 @@ export interface SentenceBreakdown {
   threshold_reference?: string;
   typology_reference?: string;
   graph_reference?: string;
+  evidence_source?: string;
 }
 
 export interface SarNarrative {
@@ -129,6 +144,9 @@ export interface SarNarrative {
   created_at: string;
   sentences: SentenceBreakdown[];
 }
+
+// NarrativeSentence is an alias for SentenceBreakdown
+export type NarrativeSentence = SentenceBreakdown;
 
 // ===== Audit Trail =====
 export interface AuditTrail {

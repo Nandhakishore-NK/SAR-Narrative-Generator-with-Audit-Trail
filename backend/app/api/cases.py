@@ -1,10 +1,5 @@
 """
 Cases API — Case CRUD with case-level data isolation.
-
-Security:
-- All endpoints require authentication
-- Case data is isolated — no cross-case access in queries
-- Input validated via Pydantic schemas
 """
 
 from typing import List
@@ -16,13 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models.case import Case, CaseStatus
-from app.models.user import User
 from app.schemas.case import CaseCreate, CaseUpdate, CaseResponse, CaseListResponse
-from app.middleware.role_guard import get_current_user, require_analyst
 from app.services.audit_service import write_immutable_log
 from app.utils.helpers import sanitize_input
 
 router = APIRouter()
+
+SYSTEM_ACTOR = "system"
 
 
 @router.get("/", response_model=List[CaseListResponse])
@@ -31,7 +26,6 @@ async def list_cases(
     limit: int = Query(50, ge=1, le=200),
     status_filter: str = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """
     List all cases with pagination and optional status filter.
@@ -57,7 +51,6 @@ async def list_cases(
 async def create_case(
     case_data: CaseCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """
     Create a new case with customer and alert information.
@@ -101,7 +94,7 @@ async def create_case(
         entity_type="case",
         entity_id=str(case.id),
         action="case_created",
-        actor_id=str(current_user.id),
+        actor_id=SYSTEM_ACTOR,
         details=f"Customer: {case.customer_name} | Alert: {case.alert_id}",
     )
 
@@ -112,7 +105,6 @@ async def create_case(
 async def get_case(
     case_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """
     Get a single case by ID.
@@ -135,7 +127,6 @@ async def update_case(
     case_id: UUID,
     updates: CaseUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_analyst),
 ):
     """Update case fields (status, notes, risk rating, etc.)."""
     result = await db.execute(select(Case).where(Case.id == case_id))
@@ -160,7 +151,7 @@ async def update_case(
         entity_type="case",
         entity_id=str(case.id),
         action="case_updated",
-        actor_id=str(current_user.id),
+        actor_id=SYSTEM_ACTOR,
         details=f"Fields updated: {', '.join(update_data.keys())}",
     )
 

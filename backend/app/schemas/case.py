@@ -27,7 +27,7 @@ class CaseCreate(BaseModel):
     account_type: Optional[str] = None
     account_open_date: Optional[datetime] = None
     account_balance: Optional[float] = None
-    account_currency: Optional[str] = "USD"
+    account_currency: Optional[str] = "INR"
 
     # Alert
     alert_id: Optional[str] = None

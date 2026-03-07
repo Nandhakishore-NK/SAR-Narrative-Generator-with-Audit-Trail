@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 class TransactionCreate(BaseModel):
     transaction_ref: Optional[str] = None
     amount: float = Field(..., gt=0)
-    currency: str = Field(default="USD", max_length=10)
+    currency: str = Field(default="INR", max_length=10)
     transaction_date: datetime
     transaction_type: Optional[str] = None
     direction: Optional[str] = Field(None, pattern="^(inbound|outbound)$")

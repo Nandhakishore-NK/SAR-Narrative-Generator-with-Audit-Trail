@@ -26,7 +26,7 @@ class MockTransaction:
         self.id = uuid.uuid4()
         self.transaction_ref = kwargs.get("ref", f"TXN-{uuid.uuid4().hex[:8]}")
         self.amount = amount
-        self.currency = kwargs.get("currency", "USD")
+        self.currency = kwargs.get("currency", "INR")
         self.transaction_date = kwargs.get("date", datetime.now(timezone.utc))
         self.transaction_type = kwargs.get("type", "wire")
         self.direction = kwargs.get("direction", "outbound")
@@ -65,7 +65,7 @@ class MockCase:
         self.account_type = kwargs.get("account_type", "checking")
         self.account_open_date = kwargs.get("open_date", datetime(2023, 1, 15, tzinfo=timezone.utc))
         self.account_balance = kwargs.get("balance", 50000)
-        self.account_currency = kwargs.get("currency", "USD")
+        self.account_currency = kwargs.get("currency", "INR")
         self.alert_id = kwargs.get("alert_id", "ALERT-2026-001")
         self.alert_date = kwargs.get("alert_date", datetime.now(timezone.utc))
         self.alert_type = kwargs.get("alert_type", "structuring")

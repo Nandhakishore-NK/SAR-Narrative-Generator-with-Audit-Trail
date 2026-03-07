@@ -10,6 +10,7 @@ Governance rules enforced:
 
 import uuid
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy import String, Text, DateTime, ForeignKey, Enum as SAEnum, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -57,8 +58,8 @@ class Override(Base):
     evidence_reference: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Role enforcement
-    analyst_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+    analyst_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=True
     )
     supervisor_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("users.id"), nullable=True

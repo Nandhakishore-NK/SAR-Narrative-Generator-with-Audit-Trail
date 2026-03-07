@@ -8,7 +8,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -54,7 +53,6 @@ interface AuditData {
 
 export default function AuditViewPage() {
   const { id } = useParams<{ id: string }>();
-  const { user, token } = useAuth();
   const router = useRouter();
 
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
@@ -63,12 +61,8 @@ export default function AuditViewPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      router.push("/login");
-      return;
-    }
     fetchAuditData();
-  }, [token, id]);
+  }, [id]);
 
   const fetchAuditData = async () => {
     setLoading(true);
@@ -92,8 +86,6 @@ export default function AuditViewPage() {
       setLoading(false);
     }
   };
-
-  if (!user) return null;
 
   if (loading) {
     return (

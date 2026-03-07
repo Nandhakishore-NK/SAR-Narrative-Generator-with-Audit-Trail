@@ -9,7 +9,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { Navbar } from "@/components/navbar";
 import { OverrideModal } from "@/components/override-modal";
@@ -60,7 +59,6 @@ import type {
 
 export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user, token } = useAuth();
   const router = useRouter();
 
   const [caseData, setCaseData] = useState<Case | null>(null);
@@ -79,12 +77,8 @@ export default function CaseDetailPage() {
   const [pendingOverrides, setPendingOverrides] = useState<Override[]>([]);
 
   useEffect(() => {
-    if (!token) {
-      router.push("/login");
-      return;
-    }
     loadAllData();
-  }, [token, id]);
+  }, [id]);
 
   const loadAllData = useCallback(async () => {
     setLoading(true);
@@ -106,21 +100,19 @@ export default function CaseDetailPage() {
         setNarrative(null);
       }
 
-      // Load pending overrides for supervisor view
-      if (user?.role === "supervisor" || user?.role === "admin") {
-        try {
-          const ovRes = await api.get("/overrides/pending");
-          setPendingOverrides(ovRes.data);
-        } catch {
-          setPendingOverrides([]);
-        }
+      // Load pending overrides
+      try {
+        const ovRes = await api.get("/overrides/pending");
+        setPendingOverrides(ovRes.data);
+      } catch {
+        setPendingOverrides([]);
       }
     } catch (err) {
       console.error("Failed to load case data", err);
     } finally {
       setLoading(false);
     }
-  }, [id, user]);
+  }, [id]);
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -157,8 +149,6 @@ export default function CaseDetailPage() {
       console.error("Override approval failed", err);
     }
   };
-
-  if (!user) return null;
 
   if (loading) {
     return (
@@ -453,7 +443,7 @@ export default function CaseDetailPage() {
               )}
             </div>
             <div className="flex gap-2">
-              {(user.role === "analyst" || user.role === "admin") && (
+              {
                 <Button
                   onClick={handleGenerate}
                   disabled={generating}
@@ -471,7 +461,7 @@ export default function CaseDetailPage() {
                     </>
                   )}
                 </Button>
-              )}
+              }
             </div>
           </CardHeader>
           <CardContent>
@@ -526,8 +516,7 @@ export default function CaseDetailPage() {
                               )}
                             </div>
                           </div>
-                          {(user.role === "analyst" || user.role === "admin") && (
-                            <Button
+                          <Button
                               variant="ghost"
                               size="sm"
                               className="gap-1 flex-shrink-0"
@@ -536,7 +525,6 @@ export default function CaseDetailPage() {
                               <Pencil className="h-3 w-3" />
                               Override
                             </Button>
-                          )}
                         </div>
                       </div>
                     ))}
@@ -548,8 +536,7 @@ export default function CaseDetailPage() {
         </Card>
 
         {/* Pending Overrides (Supervisor View) */}
-        {(user.role === "supervisor" || user.role === "admin") &&
-          pendingOverrides.length > 0 && (
+        {pendingOverrides.length > 0 && (
             <Card className="border-amber-200">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2 text-amber-700">

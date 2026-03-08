@@ -16,6 +16,12 @@ from datetime import datetime, timezone, timedelta
 
 import streamlit as st
 
+_IST = timezone(timedelta(hours=5, minutes=30))
+
+def _now_ist() -> datetime:
+    """Return the current datetime in IST (UTC+5:30)."""
+    return datetime.now(_IST)
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Page config (must be first Streamlit call)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -675,7 +681,7 @@ def page_case_management():
                     "case_id": nc_id, "customer_name": nc_cust,
                     "risk_rating": nc_risk, "status": nc_status,
                     "alert_type": nc_alert,
-                    "created_at": datetime.now().strftime("%Y-%m-%d"),
+                    "created_at": _now_ist().strftime("%Y-%m-%d"),
                 })
                 st.success(f"Case {nc_id} created.")
                 st.rerun()
@@ -968,7 +974,7 @@ def page_generate_sar():
                         "risk_rating": cust["customer_risk_rating"],
                         "status": "IN_REVIEW",
                         "alert_type": case_dict["alert_type"],
-                        "created_at": datetime.now().strftime("%Y-%m-%d"),
+                        "created_at": _now_ist().strftime("%Y-%m-%d"),
                     }
                     existing_ids = [c["case_id"] for c in st.session_state.cases]
                     if case_dict["case_id"] not in existing_ids:
@@ -978,7 +984,7 @@ def page_generate_sar():
                             if _c["case_id"] == case_dict["case_id"]:
                                 _c["status"] = "IN_REVIEW"
                     st.session_state.audit_log.insert(0, {
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "timestamp": _now_ist().strftime("%Y-%m-%d %H:%M:%S"),
                         "user": st.session_state.get("username", "analyst"),
                         "action": "STR_GENERATED", "case_id": case_dict["case_id"],
                         "details": f"SAR narrative generated — severity {sev}. Moved to IN_REVIEW.",
@@ -1162,7 +1168,7 @@ def page_generate_sar():
                         "risk_rating": case_dict["customer_risk_rating"] or st.session_state.get("risk_rating","MEDIUM"),
                         "status": "IN_REVIEW",
                         "alert_type": case_dict["alert_type"],
-                        "created_at": datetime.now().strftime("%Y-%m-%d"),
+                        "created_at": _now_ist().strftime("%Y-%m-%d"),
                     }
                     existing_ids = [c["case_id"] for c in st.session_state.cases]
                     if case_dict["case_id"] not in existing_ids:
@@ -1172,7 +1178,7 @@ def page_generate_sar():
                             if _c["case_id"] == case_dict["case_id"]:
                                 _c["status"] = "IN_REVIEW"
                     st.session_state.audit_log.insert(0, {
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "timestamp": _now_ist().strftime("%Y-%m-%d %H:%M:%S"),
                         "user": st.session_state.get("username", "analyst"),
                         "action": "STR_GENERATED", "case_id": case_dict["case_id"],
                         "details": f"SAR narrative generated — severity {sev}. Moved to IN_REVIEW.",
@@ -1242,7 +1248,7 @@ def page_review():
                 if ac1.button("✅ Approve", key=f"app_{c['case_id']}", type="primary"):
                     c["status"] = "APPROVED"
                     st.session_state.audit_log.insert(0, {
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "timestamp": _now_ist().strftime("%Y-%m-%d %H:%M:%S"),
                         "user": st.session_state.username,
                         "action": "SAR_APPROVED", "case_id": c["case_id"],
                         "details": f"Approved by {current_user().get('name','')}",

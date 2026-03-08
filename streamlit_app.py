@@ -53,8 +53,8 @@ html, body, [class*="css"] {
 section[data-testid="stSidebar"] {
     background: #ffffff !important;
     border-right: 1px solid #e2e8f0 !important;
+    color: #1a202c !important;
 }
-section[data-testid="stSidebar"] * { color: #1a202c !important; }
 .sidebar-logo {
     font-size: 1.25rem; font-weight: 900; color: #1a202c !important;
     letter-spacing: -0.5px;
@@ -253,10 +253,46 @@ div[data-testid="stMetricLabel"] {
     border-bottom: 2px solid #1a202c !important;
 }
 
-/* Expanders */
-.streamlit-expanderHeader {
-    font-weight: 700 !important;
+/* ── Expanders ───────────────────────────────────────────────────────── */
+[data-testid="stExpander"] summary {
+    background: #f8fafc !important;
     color: #1a202c !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+[data-testid="stExpander"] details {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+}
+
+/* ── Form submit buttons — dark bg, white text (separate from stButton) ─ */
+[data-testid="stFormSubmitButton"] > button {
+    background: #1a202c !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.2px !important;
+    font-size: 0.88rem !important;
+}
+[data-testid="stFormSubmitButton"] > button:hover {
+    background: #2d3748 !important;
+}
+
+/* ── Download buttons — white outlined ──────────────────────────────── */
+.stDownloadButton > button {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e0 !important;
+    color: #1a202c !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.2px !important;
+    font-size: 0.88rem !important;
+}
+.stDownloadButton > button:hover {
+    background: #f7fafc !important;
+    border-color: #a0aec0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -719,7 +755,7 @@ def page_dashboard():
             fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                               font_color="#4a5568", showlegend=True, height=280,
                               margin=dict(t=10, b=10),
-                              legend=dict(font=dict(color="#4a5568")))
+                              legend=dict(font=dict(color="#1a202c", size=12), bgcolor="rgba(255,255,255,0.9)", bordercolor="#e2e8f0", borderwidth=1))
             st.plotly_chart(fig, use_container_width=True)
         except ImportError:
             from collections import Counter
@@ -1585,7 +1621,7 @@ def page_reports():
             fig2 = go.Figure(go.Pie(labels=list(ac.keys()), values=list(ac.values()), hole=0.4))
             fig2.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                                font_color="#4a5568", height=260, margin=dict(t=10,b=10),
-                               legend=dict(font=dict(color="#4a5568")))
+                               legend=dict(font=dict(color="#1a202c", size=12), bgcolor="rgba(255,255,255,0.9)", bordercolor="#e2e8f0", borderwidth=1))
             st.plotly_chart(fig2, use_container_width=True)
     except ImportError:
         st.info("Install plotly for charts: `pip install plotly`")

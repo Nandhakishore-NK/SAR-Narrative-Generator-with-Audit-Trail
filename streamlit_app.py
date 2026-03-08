@@ -151,26 +151,85 @@ section[data-testid="stSidebar"] * { color: #1a202c !important; }
 }
 
 /* ── Streamlit native overrides ──────────────────────────────────────── */
+
+/* All buttons: clean rounded style */
 .stButton > button {
     border-radius: 6px !important;
     font-weight: 600 !important;
-    letter-spacing: 0.3px !important;
+    font-size: 0.88rem !important;
+    letter-spacing: 0.2px !important;
+    color: #1a202c !important;
 }
-.stButton > button[kind="primary"] {
+
+/* Sidebar nav buttons — secondary (inactive) */
+section[data-testid="stSidebar"] .stButton > button {
+    background: transparent !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #4a5568 !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: #f7fafc !important;
+    color: #1a202c !important;
+    border-color: #cbd5e0 !important;
+}
+
+/* Sidebar nav buttons — primary (active page) */
+section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
     background: #1a202c !important;
     border: none !important;
-    color: white !important;
+    color: #ffffff !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
 }
-.stButton > button[kind="primary"]:hover {
+section[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
     background: #2d3748 !important;
 }
+
+/* Main content primary buttons */
+.main .stButton > button[kind="primary"],
+section[data-testid="stMain"] .stButton > button[kind="primary"] {
+    background: #1a202c !important;
+    border: none !important;
+    color: #ffffff !important;
+}
+section[data-testid="stMain"] .stButton > button[kind="primary"]:hover {
+    background: #2d3748 !important;
+}
+
 div[data-testid="stMetricValue"] {
     font-weight: 800 !important;
     color: #1a202c !important;
 }
+div[data-testid="stMetricLabel"] {
+    font-weight: 600 !important;
+    color: #4a5568 !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
 .stTabs [data-baseweb="tab"] {
     font-weight: 600 !important;
     font-size: 0.88rem !important;
+    color: #4a5568 !important;
+}
+.stTabs [aria-selected="true"] {
+    color: #1a202c !important;
+}
+
+/* Ensure all main content text is readable */
+section[data-testid="stMain"] p,
+section[data-testid="stMain"] li,
+section[data-testid="stMain"] label,
+section[data-testid="stMain"] .stMarkdown {
+    color: #2d3748 !important;
+}
+
+/* Expanders */
+.streamlit-expanderHeader {
+    font-weight: 700 !important;
+    color: #1a202c !important;
 }
 </style>
 """, unsafe_allow_html=True)

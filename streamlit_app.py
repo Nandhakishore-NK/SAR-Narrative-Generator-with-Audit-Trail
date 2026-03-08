@@ -1,9 +1,9 @@
 """
-SAR Narrative Generator with Audit Trail
-Barclays AML Compliance Platform
+STR / SAR Narrative Generator with Audit Trail
+India AML Compliance Platform — PMLA 2002 / FIU-IND
 =========================================
 Multi-page Streamlit app: login, role-based sidebar navigation, dashboard,
-case management, SAR generation, review & approve, alerts centre, audit trail,
+case management, STR/SAR generation, review & approve, alerts centre, audit trail,
 reports & analytics, and user management.
 """
 
@@ -20,7 +20,7 @@ import streamlit as st
 # Page config (must be first Streamlit call)
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="SAR Guardian – Barclays AML",
+    page_title="SAR Guardian – India AML | PMLA 2002",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -111,21 +111,21 @@ USERS = {
     },
     "analyst1": {
         "password": "Analyst@2024!",
-        "name": "Sarah Johnson",
+        "name": "Priya Sharma",
         "role": "ANALYST",
         "department": "AML Compliance",
         "active": True,
     },
     "supervisor1": {
         "password": "Supervisor@2024!",
-        "name": "David Chen",
+        "name": "Vikram Nair",
         "role": "SUPERVISOR",
         "department": "AML Compliance",
         "active": True,
     },
     "readonly1": {
         "password": "Readonly@2024!",
-        "name": "Emma Williams",
+        "name": "Ananya Krishnamurthy",
         "role": "READ_ONLY",
         "department": "Internal Audit",
         "active": True,
@@ -139,50 +139,50 @@ def _sample_cases():
     return [
         {"case_id": "CASE-001", "customer_name": "Rajesh Kumar", "risk_rating": "HIGH",
          "status": "IN_REVIEW", "alert_type": "Structuring", "created_at": "2024-01-15"},
-        {"case_id": "CASE-002", "customer_name": "Offshore Holdings Ltd", "risk_rating": "CRITICAL",
+        {"case_id": "CASE-002", "customer_name": "Offshore Holdings Pvt Ltd", "risk_rating": "CRITICAL",
          "status": "SUBMITTED", "alert_type": "Layering", "created_at": "2024-01-18"},
-        {"case_id": "CASE-003", "customer_name": "Maria Santos", "risk_rating": "MEDIUM",
+        {"case_id": "CASE-003", "customer_name": "Kavitha Reddy", "risk_rating": "MEDIUM",
          "status": "DRAFT", "alert_type": "Velocity Spike", "created_at": "2024-01-20"},
-        {"case_id": "CASE-004", "customer_name": "Tech Ventures Inc", "risk_rating": "HIGH",
+        {"case_id": "CASE-004", "customer_name": "TechCorp Solutions Pvt Ltd", "risk_rating": "HIGH",
          "status": "APPROVED", "alert_type": "PEP Risk", "created_at": "2024-01-22"},
-        {"case_id": "CASE-005", "customer_name": "Hassan Al-Rashid", "risk_rating": "CRITICAL",
+        {"case_id": "CASE-005", "customer_name": "Deepak Patel", "risk_rating": "CRITICAL",
          "status": "IN_REVIEW", "alert_type": "Smurfing", "created_at": "2024-01-25"},
     ]
 
 def _sample_alerts():
     return [
         {"id": "ALT-001", "severity": "CRITICAL", "title": "Smurfing Pattern Detected",
-         "message": "Customer CUST-0891 shows 47 sub-threshold deposits in 72 hours totalling ₹48L.",
+         "message": "Customer CUST-0891 shows 47 sub-threshold NEFT deposits in 72 hours totalling ₹48 L (below ₹10L CTR threshold).",
          "time": "2 min ago", "read": False, "case_id": "CASE-005"},
         {"id": "ALT-002", "severity": "HIGH", "title": "Offshore Wire Transfer Alert",
-         "message": "Multiple SWIFT transfers to UAE counterparty flagged. Total: $2.3M.",
+         "message": "Multiple SWIFT transfers to UAE counterparty flagged under PMLA Section 12. Total: ₹19.2 Cr.",
          "time": "15 min ago", "read": False, "case_id": "CASE-002"},
         {"id": "ALT-003", "severity": "HIGH", "title": "PEP Transaction Flagged",
-         "message": "Politically Exposed Person transaction ₹15L — requires enhanced due diligence.",
+         "message": "Politically Exposed Person transaction ₹15 L — Enhanced Due Diligence required per RBI KYC Master Circular.",
          "time": "1 hr ago", "read": False, "case_id": "CASE-004"},
         {"id": "ALT-004", "severity": "MEDIUM", "title": "Velocity Threshold Breach",
-         "message": "Transaction velocity 3.2x above 90-day average for CUST-0234.",
+         "message": "RTGS/NEFT transaction velocity 3.2x above 90-day average for CUST-0234 — FIU-IND velocity rule triggered.",
          "time": "3 hr ago", "read": True, "case_id": "CASE-003"},
-        {"id": "ALT-005", "severity": "MEDIUM", "title": "Round-Number Transactions",
-         "message": "6 consecutive round-number cash withdrawals detected.",
+        {"id": "ALT-005", "severity": "MEDIUM", "title": "Round-Number Cash Transactions",
+         "message": "6 consecutive round-number cash withdrawals detected — possible smurfing below ₹50,000 threshold.",
          "time": "5 hr ago", "read": True, "case_id": "CASE-001"},
-        {"id": "ALT-006", "severity": "LOW", "title": "Address Mismatch",
-         "message": "KYC address does not match transaction origination country.",
+        {"id": "ALT-006", "severity": "LOW", "title": "KYC Address Mismatch",
+         "message": "Aadhaar/PAN address does not match transaction origination location — CKYC re-verification required.",
          "time": "1 day ago", "read": True, "case_id": "CASE-003"},
     ]
 
 def _sample_audit_log():
     return [
-        {"timestamp": "2024-01-25 09:14:32", "user": "analyst1", "action": "SAR_GENERATED",
-         "case_id": "CASE-005", "details": "AI narrative generated for smurfing case"},
-        {"timestamp": "2024-01-25 09:30:11", "user": "supervisor1", "action": "SAR_REVIEWED",
-         "case_id": "CASE-005", "details": "Narrative reviewed and approved"},
+        {"timestamp": "2024-01-25 09:14:32", "user": "analyst1", "action": "STR_GENERATED",
+         "case_id": "CASE-005", "details": "AI narrative generated for smurfing case (PMLA STR)"},
+        {"timestamp": "2024-01-25 09:30:11", "user": "supervisor1", "action": "STR_REVIEWED",
+         "case_id": "CASE-005", "details": "Narrative reviewed and approved for FIU-IND submission"},
         {"timestamp": "2024-01-24 14:22:05", "user": "analyst1", "action": "CASE_CREATED",
-         "case_id": "CASE-005", "details": "New suspicious activity case created"},
+         "case_id": "CASE-005", "details": "New suspicious activity case created under PMLA 2002"},
         {"timestamp": "2024-01-23 11:05:47", "user": "admin", "action": "USER_LOGIN",
-         "case_id": "—", "details": "Admin login from 192.168.1.10"},
-        {"timestamp": "2024-01-22 16:45:33", "user": "analyst1", "action": "SAR_GENERATED",
-         "case_id": "CASE-004", "details": "PEP risk SAR narrative generated"},
+         "case_id": "—", "details": "Admin login from 10.0.0.5"},
+        {"timestamp": "2024-01-22 16:45:33", "user": "analyst1", "action": "STR_GENERATED",
+         "case_id": "CASE-004", "details": "PEP risk STR narrative generated per RBI KYC Master Circular"},
     ]
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -212,6 +212,17 @@ for _k, _v in _defaults.items():
 def sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
+def format_inr(amount: float) -> str:
+    """Format amount using Indian number system (lakhs / crores)."""
+    if amount >= 1_00_00_000:
+        return f"₹{amount / 1_00_00_000:.2f} Cr"
+    elif amount >= 1_00_000:
+        return f"₹{amount / 1_00_000:.2f} L"
+    elif amount >= 1000:
+        return f"₹{amount:,.0f}"
+    else:
+        return f"₹{amount:.2f}"
+
 def unread_count() -> int:
     return sum(1 for a in st.session_state.alerts if not a["read"])
 
@@ -240,29 +251,44 @@ def _get_llm_client(api_key: str, provider: str):
     except Exception:
         return None
 
-SYSTEM_PROMPT = """You are a Regulator-Grade Financial Crime Compliance AI Engine.
-Generate SAR draft narratives and complete machine-auditable reasoning records.
-Follow FinCEN, FIU-IND, and FATF standards.
+SYSTEM_PROMPT = """You are a Regulator-Grade Financial Crime Compliance AI Engine specialised for the Indian AML/CFT framework.
+Generate STR (Suspicious Transaction Report) draft narratives and complete machine-auditable reasoning records compliant with:
+- PMLA 2002 (Prevention of Money Laundering Act) and 2023 Amendments
+- FIU-IND reporting obligations: STR, CTR (≥₹10L cash), NTR, CCR — filed under PMLA Section 12
+- RBI Master Direction on Know Your Customer (KYC) 2016 (updated 2023)
+- SEBI AML/CFT Guidelines for regulated entities
+- FATF Recommendations (India — FATF Member; mutual evaluation framework)
+
+Indian Regulatory Thresholds:
+- CTR: Cash transactions ≥ ₹10,00,000 (₹10 lakhs) in a single day
+- STR: All suspicious transactions regardless of amount — due within 7 working days of suspicion
+- NTR: Cash transactions ≥ ₹50,000 by non-customers
+- Structuring threshold: Transactions structured to avoid ₹50,000 or ₹10L reporting limits
 
 RULES:
 - Use ONLY the structured case data provided. Do NOT fabricate data.
-- Use regulator-safe language. Do NOT state criminal guilt.
-- Base suspicion solely on financial behavior.
+- Use regulator-safe language. Do NOT assert criminal guilt.
+- Base suspicion solely on observed financial behaviour patterns.
+- Reference applicable PMLA sections and FIU-IND/RBI guidelines where relevant.
+- Use Indian number system: lakhs (L) and crores (Cr) for amounts, not millions/billions.
 
 OUTPUT TWO SECTIONS EXACTLY:
 
-SECTION A — SAR DRAFT NARRATIVE
+SECTION A — STR DRAFT NARRATIVE (FIU-IND Format)
 ## 1. Subject Information
 ## 2. Summary of Suspicious Activity
 ## 3. Detailed Transaction Pattern Analysis
-## 4. Typology Mapping
-## 5. Risk Scoring & Threshold Analysis
-## 6. Data Completeness & Limitations
-## 7. Conclusion
+## 4. Typology Mapping (FATF / FIU-IND Typology)
+## 5. Risk Scoring & Threshold Analysis (PMLA/RBI Thresholds)
+## 6. Regulatory Obligations & Reporting Basis
+## 7. Data Completeness & Limitations
+## 8. Conclusion & Recommended Next Steps
 
 SECTION B — COMPLETE AUDIT TRAIL (STRICT JSON, no markdown fences):
 {
   "case_id": "<case_id>",
+  "regulatory_framework": "PMLA 2002 | FIU-IND | RBI KYC Master Direction | FATF",
+  "reporting_obligation": "STR to FIU-IND under PMLA Section 12",
   "model_metadata": {"model_version": "llama-3.3-70b-versatile", "generation_timestamp": "<ISO-8601>"},
   "data_sources_used": [],
   "triggering_rules": [],
@@ -281,7 +307,7 @@ SECTION B — COMPLETE AUDIT TRAIL (STRICT JSON, no markdown fences):
     "recommended_next_steps": []
   },
   "identified_data_gaps": [],
-  "model_limitations": "LLM-generated narrative requires human review.",
+  "model_limitations": "LLM-generated STR narrative requires review by a qualified PMLA Compliance Officer before submission to FIU-IND.",
   "governance_flags": []
 }"""
 
@@ -337,7 +363,7 @@ def page_login():
         <div style="text-align:center; padding-top:80px;">
             <img src="https://img.icons8.com/color/96/bank.png" width="72" style="margin-bottom:12px"/>
             <div class="login-title">SAR Narrative Generator</div>
-            <div class="login-sub">Barclays AML Compliance Platform</div>
+            <div class="login-sub">India AML Compliance Platform — PMLA 2002 / FIU-IND</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -372,7 +398,7 @@ def render_sidebar():
         st.markdown("""
         <div style="padding:16px 0 8px;">
             <div class="sidebar-logo">🛡️ SAR Guardian</div>
-            <div style="font-size:0.7rem; color:#5c7a9e; letter-spacing:2px;">BARCLAYS AML</div>
+            <div style="font-size:0.7rem; color:#5c7a9e; letter-spacing:2px;">FIU-IND | PMLA 2002</div>
         </div>
         """, unsafe_allow_html=True)
         st.divider()
@@ -424,7 +450,7 @@ def render_sidebar():
 
         st.markdown(
             f"<div style='font-size:0.7rem; color:#37474f; text-align:center; margin-top:10px;'>"
-            f"v2.0 | Barclays AML © 2024</div>",
+            f"v2.0 | FIU-IND AML © 2024</div>",
             unsafe_allow_html=True,
         )
 
@@ -433,7 +459,7 @@ def render_sidebar():
 # ─────────────────────────────────────────────────────────────────────────────
 def page_dashboard():
     st.markdown("## 📊 Dashboard")
-    st.markdown("**AML Compliance Overview**")
+    st.markdown("**AML Compliance Overview — PMLA 2002 | FIU-IND | RBI**")
     st.divider()
 
     cases = st.session_state.cases
@@ -601,32 +627,32 @@ def _sample_customers():
         "Arjun Sharma (CUST-001) [HIGH]": {
             "customer_id": "CUST-001", "customer_name": "Arjun Sharma",
             "customer_type": "individual", "customer_risk_rating": "HIGH",
-            "occupation": "Import/Export Trader", "employer": "Sharma Trading Ltd",
-            "annual_income": "₹85,000", "nationality": "Indian",
+            "occupation": "Import/Export Trader", "employer": "Sharma Trading Pvt Ltd",
+            "annual_income": "₹85,00,000", "nationality": "Indian",
             "pep": False, "kyc_status": "VERIFIED",
             "account_number": "ACC-10012201", "account_type": "current",
-            "account_balance": 125000,
+            "account_balance": 12500000,
             "alerts": {
-                "[HIGH] STRUCTURING | ₹487,500 | ALT-2024-001": {
+                "[HIGH] STRUCTURING | ₹4.85 Cr | ALT-2024-001": {
                     "alert_id": "ALT-2024-001", "alert_type": "STRUCTURING", "severity": "HIGH",
-                    "alert_score": 94.5, "total_amount": 487500, "txn_count": 47,
+                    "alert_score": 94.5, "total_amount": 48500000, "txn_count": 47,
                     "date_from": "2024-01-08", "date_to": "2024-01-15",
-                    "jurisdictions": ["United Kingdom", "United Arab Emirates", "Hong Kong", "Cayman Islands"],
+                    "jurisdictions": ["India", "United Arab Emirates", "Singapore", "Cayman Islands"],
                     "triggering_factors": [
-                        "47 incoming transfers from different source accounts in 7 days",
-                        "Immediate outbound international wire transfer of £485,000 following receipt",
-                        "Transaction amounts structured at £9,500–£9,999 range (below £10K threshold)",
-                        "Destination account in UAE — high-risk jurisdiction",
-                        "Activity inconsistent with stated occupation (Import/Export Trader) and income (£85K)",
+                        "47 incoming NEFT/RTGS transfers from different source accounts in 7 days",
+                        "Immediate outbound SWIFT transfer of ₹4.85 Cr following receipt of funds",
+                        "Transaction amounts structured at ₹9.5L–₹9.99L range (below ₹10L CTR threshold)",
+                        "Destination account in UAE — FATF-monitored jurisdiction per RBI High-Risk List",
+                        "Activity inconsistent with stated occupation and declared income of ₹85L p.a.",
                     ],
                     "transactions": [
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0001", "amount": 9800, "currency": "GBP", "transaction_date": "2024-01-08", "transaction_type": "wire", "direction": "inbound", "counterparty_name": "Various Sources", "counterparty_bank": "Barclays UK", "country": "United Kingdom", "purpose": "Trade payment", "is_flagged": True},
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0002", "amount": 9950, "currency": "GBP", "transaction_date": "2024-01-09", "transaction_type": "wire", "direction": "inbound", "counterparty_name": "Various Sources", "counterparty_bank": "HSBC UK", "country": "United Kingdom", "purpose": "Trade payment", "is_flagged": True},
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0048", "amount": 485000, "currency": "GBP", "transaction_date": "2024-01-15", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Gulf Trade LLC", "counterparty_bank": "Emirates NBD", "country": "United Arab Emirates", "purpose": "Business investment", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0001", "amount": 980000, "currency": "INR", "transaction_date": "2024-01-08", "transaction_type": "neft", "direction": "inbound", "counterparty_name": "Various Sources", "counterparty_bank": "SBI Mumbai", "country": "India", "purpose": "Trade payment", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0002", "amount": 995000, "currency": "INR", "transaction_date": "2024-01-09", "transaction_type": "rtgs", "direction": "inbound", "counterparty_name": "Various Sources", "counterparty_bank": "ICICI Bank Mumbai", "country": "India", "purpose": "Trade payment", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0048", "amount": 48500000, "currency": "INR", "transaction_date": "2024-01-15", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Gulf Trade LLC", "counterparty_bank": "Emirates NBD Dubai", "country": "United Arab Emirates", "purpose": "Business investment", "is_flagged": True},
                     ],
                     "rule_triggers": [
-                        {"id": str(uuid.uuid4()), "rule_code": "STR001", "rule_description": "Multiple sub-threshold transactions to avoid reporting", "typology_code": "Structuring", "threshold_value": 10000, "actual_value": 9950, "breached": True},
-                        {"id": str(uuid.uuid4()), "rule_code": "GEO002", "rule_description": "Wire transfer to high-risk jurisdiction (UAE)", "typology_code": "Jurisdiction Risk", "threshold_value": 1, "actual_value": 1, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "CTR001", "rule_description": "Multiple sub-threshold NEFT/RTGS transactions to avoid CTR filing — PMLA 2002 Section 12 / RBI Master Direction on AML", "typology_code": "Structuring", "threshold_value": 1000000, "actual_value": 995000, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "GEO002", "rule_description": "Wire transfer to FATF-monitored high-risk jurisdiction (UAE) — RBI KYC Master Direction enhanced monitoring", "typology_code": "Jurisdiction Risk", "threshold_value": 1, "actual_value": 1, "breached": True},
                     ],
                 },
             },
@@ -634,31 +660,31 @@ def _sample_customers():
         "Elena Petrov (CUST-002) [VERY HIGH]": {
             "customer_id": "CUST-002", "customer_name": "Elena Petrov",
             "customer_type": "PEP", "customer_risk_rating": "VERY HIGH",
-            "occupation": "Government Official", "employer": "Ministry of Finance",
-            "annual_income": "₹3,20,000", "nationality": "Russian",
+            "occupation": "Government Official", "employer": "Ministry of Finance (Foreign National)",
+            "annual_income": "₹3,20,00,000", "nationality": "Russian",
             "pep": True, "kyc_status": "ENHANCED DUE DILIGENCE",
             "account_number": "ACC-10023102", "account_type": "offshore",
-            "account_balance": 4500000,
+            "account_balance": 450000000,
             "alerts": {
-                "[VERY HIGH] LAYERING | ₹2,850,000 | ALT-2024-002": {
+                "[VERY HIGH] LAYERING | ₹23.75 Cr | ALT-2024-002": {
                     "alert_id": "ALT-2024-002", "alert_type": "LAYERING", "severity": "CRITICAL",
-                    "alert_score": 98.1, "total_amount": 2850000, "txn_count": 12,
+                    "alert_score": 98.1, "total_amount": 237500000, "txn_count": 12,
                     "date_from": "2024-01-10", "date_to": "2024-01-20",
-                    "jurisdictions": ["Russia", "Cyprus", "Cayman Islands", "British Virgin Islands"],
+                    "jurisdictions": ["India", "Cyprus", "Cayman Islands", "British Virgin Islands"],
                     "triggering_factors": [
-                        "PEP customer with 12 large offshore transfers in 10 days",
-                        "Funds routed through multiple shell company accounts",
-                        "Transfers to secrecy jurisdictions (BVI, Cayman Islands)",
-                        "No legitimate business rationale provided",
-                        "Transaction values inconsistent with declared government salary",
+                        "PEP customer with 12 large offshore SWIFT transfers in 10 days",
+                        "Funds routed through multiple shell company accounts in secrecy jurisdictions",
+                        "Transfers to BVI and Cayman Islands — high-risk jurisdictions per RBI/FATF",
+                        "No legitimate business rationale provided — PMLA Section 12(1)(b) violation",
+                        "Transaction values grossly inconsistent with declared government salary",
                     ],
                     "transactions": [
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-EP01", "amount": 950000, "currency": "USD", "transaction_date": "2024-01-10", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Meridian Holdings Ltd", "counterparty_bank": "Bank of Cyprus", "country": "Cyprus", "purpose": "Investment", "is_flagged": True},
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-EP02", "amount": 1200000, "currency": "USD", "transaction_date": "2024-01-15", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Sunridge BVI Inc", "counterparty_bank": "BVI Offshore Bank", "country": "British Virgin Islands", "purpose": "Loan repayment", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-EP01", "amount": 79000000, "currency": "INR", "transaction_date": "2024-01-10", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Meridian Holdings Ltd", "counterparty_bank": "Bank of Cyprus", "country": "Cyprus", "purpose": "Investment", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-EP02", "amount": 99500000, "currency": "INR", "transaction_date": "2024-01-15", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Sunridge BVI Inc", "counterparty_bank": "BVI Offshore Bank", "country": "British Virgin Islands", "purpose": "Loan repayment", "is_flagged": True},
                     ],
                     "rule_triggers": [
-                        {"id": str(uuid.uuid4()), "rule_code": "PEP001", "rule_description": "PEP high-value transaction without EDD clearance", "typology_code": "PEP Risk", "threshold_value": 100000, "actual_value": 950000, "breached": True},
-                        {"id": str(uuid.uuid4()), "rule_code": "LAY003", "rule_description": "Layering through offshore shell companies", "typology_code": "Layering", "threshold_value": 3, "actual_value": 12, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "PEP001", "rule_description": "PEP high-value transaction without EDD clearance — PMLA 2002 Section 12(1)(b) and RBI KYC Master Circular on PEP", "typology_code": "PEP Risk", "threshold_value": 10000000, "actual_value": 79000000, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "LAY003", "rule_description": "Layering through offshore shell companies — FATF Recommendation 20, PMLA Section 3 predicate offence risk", "typology_code": "Layering", "threshold_value": 3, "actual_value": 12, "breached": True},
                     ],
                 },
             },
@@ -666,29 +692,30 @@ def _sample_customers():
         "Mohammed Al-Rashid (CUST-003) [HIGH]": {
             "customer_id": "CUST-003", "customer_name": "Mohammed Al-Rashid",
             "customer_type": "individual", "customer_risk_rating": "HIGH",
-            "occupation": "Real Estate Developer", "employer": "Al-Rashid Properties",
-            "annual_income": "₹5,00,000", "nationality": "Saudi Arabian",
+            "occupation": "Real Estate Developer", "employer": "Al-Rashid Properties Pvt Ltd",
+            "annual_income": "₹5,00,00,000", "nationality": "Saudi Arabian",
             "pep": False, "kyc_status": "VERIFIED",
             "account_number": "ACC-10034503", "account_type": "current",
-            "account_balance": 890000,
+            "account_balance": 89000000,
             "alerts": {
-                "[HIGH] SMURFING | ₹980,000 | ALT-2024-003": {
+                "[HIGH] SMURFING | ₹9.80 L | ALT-2024-003": {
                     "alert_id": "ALT-2024-003", "alert_type": "SMURFING", "severity": "HIGH",
                     "alert_score": 88.7, "total_amount": 980000, "txn_count": 32,
                     "date_from": "2024-01-05", "date_to": "2024-01-12",
                     "jurisdictions": ["India", "United Arab Emirates", "Saudi Arabia"],
                     "triggering_factors": [
-                        "32 cash deposits below ₹50,000 threshold within 7 days",
-                        "Deposits made at 11 different branch locations",
-                        "Total structured amount approaches ₹10L CTR threshold",
-                        "Inconsistent with customer's declared business activity",
+                        "32 cash deposits below ₹50,000 threshold within 7 days across multiple branches",
+                        "Deposits made at 11 different HDFC Bank branch locations in Mumbai",
+                        "Total structured amount of ₹9.8L approaches ₹10L CTR reporting threshold",
+                        "Pattern consistent with smurfing typology per FIU-IND Advisory No. 2022-03",
+                        "Cash deposit pattern inconsistent with customer's declared real estate business",
                     ],
                     "transactions": [
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-AR01", "amount": 49500, "currency": "INR", "transaction_date": "2024-01-05", "transaction_type": "cash", "direction": "inbound", "counterparty_name": "Cash Deposit", "counterparty_bank": "HDFC Mumbai", "country": "India", "purpose": "Business income", "is_flagged": True},
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-AR02", "amount": 49800, "currency": "INR", "transaction_date": "2024-01-06", "transaction_type": "cash", "direction": "inbound", "counterparty_name": "Cash Deposit", "counterparty_bank": "HDFC Pune", "country": "India", "purpose": "Business income", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-AR01", "amount": 49500, "currency": "INR", "transaction_date": "2024-01-05", "transaction_type": "cash", "direction": "inbound", "counterparty_name": "Cash Deposit", "counterparty_bank": "HDFC Bank Mumbai – Andheri Branch", "country": "India", "purpose": "Business income", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-AR02", "amount": 49800, "currency": "INR", "transaction_date": "2024-01-06", "transaction_type": "cash", "direction": "inbound", "counterparty_name": "Cash Deposit", "counterparty_bank": "HDFC Bank Pune – FC Road Branch", "country": "India", "purpose": "Business income", "is_flagged": True},
                     ],
                     "rule_triggers": [
-                        {"id": str(uuid.uuid4()), "rule_code": "SMRF003", "rule_description": "Multiple sub-threshold cash deposits (smurfing pattern)", "typology_code": "Smurfing", "threshold_value": 50000, "actual_value": 49800, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "SMRF003", "rule_description": "Multiple sub-threshold cash deposits (smurfing) — FIU-IND Advisory on Structuring/Smurfing, PMLA Section 3", "typology_code": "Smurfing", "threshold_value": 50000, "actual_value": 49800, "breached": True},
                     ],
                 },
             },
@@ -697,27 +724,27 @@ def _sample_customers():
             "customer_id": "CUST-004", "customer_name": "Li Wei Chen",
             "customer_type": "entity", "customer_risk_rating": "MEDIUM",
             "occupation": "Technology Consulting", "employer": "SinoTech Solutions Pvt Ltd",
-            "annual_income": "₹2,00,000", "nationality": "Chinese",
+            "annual_income": "₹2,00,00,000", "nationality": "Chinese",
             "pep": False, "kyc_status": "VERIFIED",
             "account_number": "ACC-10045804", "account_type": "current",
-            "account_balance": 340000,
+            "account_balance": 34000000,
             "alerts": {
-                "[MEDIUM] VELOCITY SPIKE | ₹1,250,000 | ALT-2024-004": {
+                "[MEDIUM] VELOCITY SPIKE | ₹1.25 Cr | ALT-2024-004": {
                     "alert_id": "ALT-2024-004", "alert_type": "VELOCITY SPIKE", "severity": "MEDIUM",
-                    "alert_score": 72.3, "total_amount": 1250000, "txn_count": 18,
+                    "alert_score": 72.3, "total_amount": 12500000, "txn_count": 18,
                     "date_from": "2024-01-18", "date_to": "2024-01-25",
                     "jurisdictions": ["India", "China", "Singapore"],
                     "triggering_factors": [
-                        "Transaction velocity 4.1x above 90-day moving average",
-                        "Sudden large outward remittances to China",
-                        "No corresponding increase in declared business revenue",
-                        "SWIFT transfers to newly registered counterparties",
+                        "RTGS/SWIFT transaction velocity 4.1x above 90-day moving average",
+                        "Sudden large outward remittances to China without corresponding business contracts",
+                        "No corresponding increase in declared business revenue — unusual for IT services",
+                        "SWIFT transfers to newly registered counterparties flagged by RBI velocity monitoring",
                     ],
                     "transactions": [
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-LW01", "amount": 450000, "currency": "CNY", "transaction_date": "2024-01-18", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Shanghai Tech Co", "counterparty_bank": "Bank of China", "country": "China", "purpose": "Service fees", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-LW01", "amount": 4500000, "currency": "INR", "transaction_date": "2024-01-18", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Shanghai Tech Co", "counterparty_bank": "Bank of China Shanghai", "country": "China", "purpose": "Service fees", "is_flagged": True},
                     ],
                     "rule_triggers": [
-                        {"id": str(uuid.uuid4()), "rule_code": "VELOC005", "rule_description": "Transaction velocity exceeds 4x 90-day average", "typology_code": "Velocity", "threshold_value": 3, "actual_value": 4.1, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "VELOC005", "rule_description": "RTGS/SWIFT velocity 4x above 90-day average — RBI AML/CFT Policy velocity monitoring threshold breached", "typology_code": "Velocity", "threshold_value": 3, "actual_value": 4.1, "breached": True},
                     ],
                 },
             },
@@ -725,29 +752,29 @@ def _sample_customers():
         "Obiageli Nwosu (CUST-005) [HIGH]": {
             "customer_id": "CUST-005", "customer_name": "Obiageli Nwosu",
             "customer_type": "individual", "customer_risk_rating": "HIGH",
-            "occupation": "NGO Director", "employer": "Global Aid Foundation",
-            "annual_income": "₹1,50,000", "nationality": "Nigerian",
+            "occupation": "NGO Director", "employer": "Global Aid Foundation India",
+            "annual_income": "₹1,50,00,000", "nationality": "Nigerian",
             "pep": False, "kyc_status": "VERIFIED",
             "account_number": "ACC-10056705", "account_type": "savings",
-            "account_balance": 215000,
+            "account_balance": 21500000,
             "alerts": {
-                "[HIGH] TRADE FINANCE FRAUD | ₹3,400,000 | ALT-2024-005": {
+                "[HIGH] TRADE FINANCE FRAUD | ₹34 Cr | ALT-2024-005": {
                     "alert_id": "ALT-2024-005", "alert_type": "TRADE FINANCE FRAUD", "severity": "HIGH",
-                    "alert_score": 91.2, "total_amount": 3400000, "txn_count": 8,
+                    "alert_score": 91.2, "total_amount": 340000000, "txn_count": 8,
                     "date_from": "2024-01-20", "date_to": "2024-01-28",
-                    "jurisdictions": ["Nigeria", "United Kingdom", "UAE", "India"],
+                    "jurisdictions": ["Nigeria", "India", "UAE", "Singapore"],
                     "triggering_factors": [
-                        "Invoices for non-existent goods used to justify large transfers",
-                        "Multiple round-number transfers inconsistent with trade patterns",
-                        "Counterparty flagged in previous SAR filings",
-                        "NGO account used for apparent commercial trade activity",
+                        "Invoices for non-existent goods used to justify large SWIFT transfers",
+                        "Multiple round-number INR transfers inconsistent with NGO trade patterns",
+                        "Counterparty flagged in previous STR filings with FIU-IND",
+                        "NGO/savings account used for apparent high-value commercial trade activity",
                     ],
                     "transactions": [
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-ON01", "amount": 1200000, "currency": "USD", "transaction_date": "2024-01-20", "transaction_type": "swift", "direction": "inbound", "counterparty_name": "Lagos Trading Co", "counterparty_bank": "Zenith Bank Nigeria", "country": "Nigeria", "purpose": "Aid contribution", "is_flagged": True},
-                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-ON02", "amount": 1200000, "currency": "USD", "transaction_date": "2024-01-21", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Falcon Investments", "counterparty_bank": "Standard Chartered UAE", "country": "United Arab Emirates", "purpose": "Grant disbursement", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-ON01", "amount": 99900000, "currency": "INR", "transaction_date": "2024-01-20", "transaction_type": "swift", "direction": "inbound", "counterparty_name": "Lagos Trading Co", "counterparty_bank": "Zenith Bank Nigeria", "country": "Nigeria", "purpose": "Aid contribution", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-ON02", "amount": 99900000, "currency": "INR", "transaction_date": "2024-01-21", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Falcon Investments", "counterparty_bank": "Standard Chartered UAE", "country": "United Arab Emirates", "purpose": "Grant disbursement", "is_flagged": True},
                     ],
                     "rule_triggers": [
-                        {"id": str(uuid.uuid4()), "rule_code": "TFF007", "rule_description": "Suspected trade finance fraud — invoice mismatch", "typology_code": "Trade Finance Fraud", "threshold_value": 500000, "actual_value": 1200000, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "TFF007", "rule_description": "Suspected trade finance fraud — invoice mismatch per RBI/SEBI Trade Finance AML Guidelines and PMLA Section 12 STR obligation", "typology_code": "Trade Finance Fraud", "threshold_value": 50000000, "actual_value": 99900000, "breached": True},
                     ],
                 },
             },
@@ -781,8 +808,8 @@ def page_generate_sar():
 
     st.markdown("""
     <div style="background:linear-gradient(90deg,#0d2244,#1a3a6e);border-radius:10px;padding:20px 28px;margin-bottom:20px;">
-        <div style="font-size:1.6rem;font-weight:800;color:#fff;">🧾 SAR Narrative Generator</div>
-        <div style="color:#90caf9;font-size:0.95rem;margin-top:4px;">AI-powered narrative generation with full audit trail</div>
+        <div style="font-size:1.6rem;font-weight:800;color:#fff;">🧾 STR / SAR Narrative Generator</div>
+        <div style="color:#90caf9;font-size:0.95rem;margin-top:4px;">AI-powered STR narrative generation — PMLA 2002 | FIU-IND | RBI compliant</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -833,7 +860,7 @@ def page_generate_sar():
                     <span style="background:{sev_color};color:#fff;padding:3px 12px;border-radius:20px;font-size:0.76rem;font-weight:700;">{alert['severity']}</span>
                 </div>
                 <div style="margin-top:10px;color:#333;font-size:0.88rem;line-height:1.9;">
-                    🔥 Total: <b>₹{alert['total_amount']:,.2f}</b> across {alert['txn_count']} transactions<br>
+                    🔥 Total: <b>{format_inr(alert['total_amount'])}</b> across {alert['txn_count']} transactions<br>
                     📅 {alert['date_from']} → {alert['date_to']}<br>
                     🌍 Jurisdictions: {jur_str}<br>
                     📊 Alert Score: <b>{alert['alert_score']}/100</b>
@@ -947,7 +974,7 @@ def page_generate_sar():
                         "transaction_type","direction","counterparty_name","country","is_flagged"]
                 st.dataframe(df[[c for c in cols if c in df.columns]], use_container_width=True)
                 m1, m2, m3 = st.columns(3)
-                m1.metric("Total Value", f"₹{sum(t['amount'] for t in st.session_state.transactions):,.0f}")
+                m1.metric("Total Value (INR)", format_inr(sum(t['amount'] for t in st.session_state.transactions)))
                 m2.metric("Flagged", sum(1 for t in st.session_state.transactions if t.get("is_flagged")))
                 m3.metric("Countries", len(set(t.get("country","") for t in st.session_state.transactions if t.get("country"))))
                 if st.button("🗑️ Clear All Transactions"):
@@ -956,11 +983,13 @@ def page_generate_sar():
 
         with tab_rules:
             SAMPLE_RULES = {
-                "STR001 – Cash threshold breach":      ("STR001","Cash transaction exceeds ₹10L threshold","Structuring",1000000),
-                "LAY002 – Layering via offshore":      ("LAY002","Multiple offshore wire transfers within 72h","Layering",3),
-                "SMRF003 – Smurfing pattern":          ("SMRF003","Multiple sub-threshold deposits detected","Smurfing",990000),
-                "PEP004 – PEP high-risk transaction":  ("PEP004","Politically Exposed Person high-value txn","PEP Risk",500000),
-                "VELOC005 – Velocity spike":           ("VELOC005","Transaction velocity 3x above 90-day avg","Velocity",3),
+                "CTR001 – Cash threshold breach (PMLA ₹10L)":   ("CTR001","Cash transaction ≥ ₹10L — CTR filing mandatory per PMLA 2002 Section 12 / RBI Master Direction","Structuring",1000000),
+                "STR001 – Suspicious transaction report":        ("STR001","Transaction inconsistent with customer profile — STR filing to FIU-IND under PMLA Section 12","Suspicious Activity",500000),
+                "LAY002 – Layering via offshore SWIFT":          ("LAY002","Multiple offshore SWIFT transfers within 72h — FATF Recommendation 20, PMLA Section 3","Layering",3),
+                "SMRF003 – Smurfing / structuring pattern":      ("SMRF003","Multiple sub-threshold cash deposits to avoid CTR — FIU-IND Smurfing Advisory 2022","Smurfing",990000),
+                "PEP004 – PEP high-risk transaction":            ("PEP004","PEP high-value transaction without EDD — RBI KYC Master Circular 2016 (Updated 2023)","PEP Risk",500000),
+                "VELOC005 – Velocity spike (RBI monitoring)":    ("VELOC005","RTGS/NEFT velocity 3x above 90-day avg — RBI AML/CFT velocity monitoring rule","Velocity",3),
+                "GEO006 – High-risk jurisdiction transfer":      ("GEO006","Wire transfer to FATF High-Risk / RBI Watch-list jurisdiction — enhanced due diligence required","Jurisdiction Risk",1),
                 "CUSTOM – Enter manually": None,
             }
             preset = st.selectbox("Quick-fill from common rules", list(SAMPLE_RULES.keys()))
@@ -1334,7 +1363,7 @@ else:
     # Footer
     st.divider()
     st.markdown(
-        "<small>⚖️ **Disclaimer:** AI-assisted SAR drafts for compliance review only. "
-        "All outputs require approval by a qualified compliance officer before submission.</small>",
+        "<small>⚖️ **Disclaimer:** AI-assisted STR/SAR drafts for compliance review only — PMLA 2002 / FIU-IND. "
+        "All outputs require review and approval by a qualified PMLA Compliance Officer before submission to FIU-IND.</small>",
         unsafe_allow_html=True,
     )

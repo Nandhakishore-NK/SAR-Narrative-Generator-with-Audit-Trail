@@ -243,7 +243,7 @@ def _get_llm_client(api_key: str, provider: str):
         if provider == "Groq":
             from langchain_groq import ChatGroq
             return ChatGroq(model="llama-3.3-70b-versatile", temperature=0.2,
-                            groq_api_key=api_key, max_tokens=4096)
+                            groq_api_key=api_key, max_tokens=8192)
         else:
             from langchain_openai import ChatOpenAI
             return ChatOpenAI(model="gpt-4o", temperature=0.2,
@@ -251,8 +251,10 @@ def _get_llm_client(api_key: str, provider: str):
     except Exception:
         return None
 
-SYSTEM_PROMPT = """You are a Regulator-Grade Financial Crime Compliance AI Engine specialised for the Indian AML/CFT framework.
-Generate STR (Suspicious Transaction Report) draft narratives and complete machine-auditable reasoning records compliant with:
+SYSTEM_PROMPT = """You are a Senior Regulator-Grade Financial Crime Compliance AI Engine specialised for the Indian AML/CFT framework.
+Your task is to produce a COMPREHENSIVE, DETAILED STR (Suspicious Transaction Report) narrative suitable for direct submission to FIU-IND, along with a complete machine-auditable reasoning record.
+
+Compliance framework:
 - PMLA 2002 (Prevention of Money Laundering Act) and 2023 Amendments
 - FIU-IND reporting obligations: STR, CTR (≥₹10L cash), NTR, CCR — filed under PMLA Section 12
 - RBI Master Direction on Know Your Customer (KYC) 2016 (updated 2023)
@@ -265,24 +267,42 @@ Indian Regulatory Thresholds:
 - NTR: Cash transactions ≥ ₹50,000 by non-customers
 - Structuring threshold: Transactions structured to avoid ₹50,000 or ₹10L reporting limits
 
-RULES:
-- Use ONLY the structured case data provided. Do NOT fabricate data.
-- Use regulator-safe language. Do NOT assert criminal guilt.
+STRICT RULES:
+- Use ONLY the structured case data provided. Do NOT fabricate transaction IDs, amounts, or dates not in the data.
+- Use regulator-safe language. Do NOT assert criminal guilt — use phrases like "gives rise to suspicion", "appears inconsistent", "warrants further investigation".
 - Base suspicion solely on observed financial behaviour patterns.
-- Reference applicable PMLA sections and FIU-IND/RBI guidelines where relevant.
-- Use Indian number system: lakhs (L) and crores (Cr) for amounts, not millions/billions.
+- Reference specific PMLA sections, FIU-IND advisories, and RBI circulars wherever applicable.
+- Use Indian number system throughout: lakhs (L) and crores (Cr), never millions/billions.
+- Each section must be SUBSTANTIVE — minimum 3–5 detailed sentences per section.
 
 OUTPUT TWO SECTIONS EXACTLY:
 
 SECTION A — STR DRAFT NARRATIVE (FIU-IND Format)
+Write each section in full paragraphs. Be thorough and specific.
+
 ## 1. Subject Information
+Provide complete subject profile: full name, customer ID, account details, customer type (individual/entity/PEP), KYC status, occupation, employer, declared annual income, nationality. State account number, account type, and current balance. Flag any PEP status or EDD requirements.
+
 ## 2. Summary of Suspicious Activity
+Write a clear, concise executive summary (3–5 sentences) of why this case is being reported. Include the alert type, total suspicious amount (in INR lakhs/crores), number of transactions, date range, and the primary reason for suspicion. Reference the specific PMLA provision that mandates reporting.
+
 ## 3. Detailed Transaction Pattern Analysis
+Analyse EVERY transaction in the data individually. For each transaction: state the transaction reference, date, amount (in INR), type (NEFT/RTGS/SWIFT/cash), direction, counterparty name, counterparty bank, country, and why it is flagged. Describe the overall pattern — timing, amounts, counterparties, jurisdictions. Identify anomalies such as round-number transactions, sub-threshold structuring, velocity spikes, or unusual counterparties. Compare observed behaviour against the customer’s declared income and business profile.
+
 ## 4. Typology Mapping (FATF / FIU-IND Typology)
+Identify and explain ALL applicable money laundering typologies present. Map each typology to (a) the FATF typology reference, (b) the FIU-IND advisory or guidance, and (c) specific transactions that exhibit the typology. Common typologies to consider: Structuring/Smurfing, Layering via Shell Companies, Trade-Based Money Laundering, PEP Abuse, Velocity Manipulation, Jurisdiction Risk.
+
 ## 5. Risk Scoring & Threshold Analysis (PMLA/RBI Thresholds)
+Provide a detailed risk assessment. State the rule codes triggered and the specific threshold values breached (e.g., sub-₹10L structuring, PEP transactions >5x declared income). Assign an overall risk score and justify it. Reference: PMLA 2002 Section 12(1)(b), RBI KYC Master Direction 2016 (Para 38 — Risk Categorisation), FIU-IND STR filing guidelines. State whether CTR/NTR/STR/CCR reporting obligations are triggered.
+
 ## 6. Regulatory Obligations & Reporting Basis
+State the precise legal basis for filing this STR: cite the specific PMLA 2002 section and sub-section, the FIU-IND format requirement, and any RBI circular applicable. State the 7-working-day filing deadline. Note whether Enhanced Due Diligence (EDD) is required under RBI KYC norms. State whether the case should be escalated to SEBI, ED, or other agencies.
+
 ## 7. Data Completeness & Limitations
+Identify gaps in the available data (e.g., missing counterparty KYC, no UBO information, incomplete transaction history). State how these gaps affect the completeness of the suspicion analysis. Note that this is an AI-assisted draft and must be verified by a qualified PMLA Compliance Officer.
+
 ## 8. Conclusion & Recommended Next Steps
+State a clear conclusion: whether the activity warrants STR submission to FIU-IND. List specific recommended next steps: (1) freeze/monitor account, (2) obtain additional KYC/EDD documents, (3) file STR with FIU-IND within 7 working days, (4) preserve transaction records for 5 years per PMLA Section 12(1)(a), (5) any inter-agency referral (ED, CBI, SEBI). State the urgency level.
 
 SECTION B — COMPLETE AUDIT TRAIL (STRICT JSON, no markdown fences):
 {
@@ -315,7 +335,9 @@ def _build_case_prompt(case, transactions, rule_triggers):
     return (f"CASE DATA:\n{json.dumps(case, indent=2, default=str)}\n\n"
             f"TRANSACTIONS ({len(transactions)} records):\n{json.dumps(transactions, indent=2, default=str)}\n\n"
             f"RULE TRIGGERS ({len(rule_triggers)} records):\n{json.dumps(rule_triggers, indent=2, default=str)}\n\n"
-            f"Generate the SAR narrative and audit trail now.")
+            f"Generate a COMPREHENSIVE, DETAILED STR narrative covering ALL 8 sections with full paragraphs. "
+            f"Each section must be substantive (minimum 3-5 sentences). Reference every transaction individually in Section 3. "
+            f"Then produce the complete SECTION B audit trail JSON.")
 
 def _parse_sar_output(raw: str, case_id: str) -> dict:
     section_b_match = re.search(r"SECTION B.*?AUDIT TRAIL.*?\n([\s\S]*)", raw, re.IGNORECASE)

@@ -149,6 +149,45 @@ def _sample_cases():
          "status": "IN_REVIEW", "alert_type": "Smurfing", "created_at": "2024-01-25"},
     ]
 
+_SUPABASE_STATUS_MAP = {
+    "open": "DRAFT",
+    "under_review": "IN_REVIEW",
+    "sar_generated": "SUBMITTED",
+    "escalated": "IN_REVIEW",
+    "closed": "APPROVED",
+}
+
+def _load_cases_from_supabase():
+    """Fetch cases from Supabase; fall back to sample data on any error."""
+    try:
+        from supabase import create_client
+        url = st.secrets.get("SUPABASE_URL", "")
+        key = st.secrets.get("SUPABASE_ANON_KEY", "")
+        if not url or not key:
+            return _sample_cases()
+        sb = create_client(url, key)
+        resp = sb.table("cases").select(
+            "id, customer_id, customer_name, customer_risk_rating, alert_type, status, created_at"
+        ).order("created_at", desc=True).execute()
+        if not resp.data:
+            return _sample_cases()
+        cases = []
+        for row in resp.data:
+            raw_id = str(row.get("id", ""))
+            case_id = "CASE-" + raw_id.replace("-", "")[:8].upper()
+            created = (row.get("created_at") or "")[:10]
+            cases.append({
+                "case_id": case_id,
+                "customer_name": row.get("customer_name", ""),
+                "risk_rating": (row.get("customer_risk_rating") or "MEDIUM").upper(),
+                "status": _SUPABASE_STATUS_MAP.get(row.get("status", "open"), "DRAFT"),
+                "alert_type": row.get("alert_type", ""),
+                "created_at": created,
+            })
+        return cases
+    except Exception:
+        return _sample_cases()
+
 def _sample_alerts():
     return [
         {"id": "ALT-001", "severity": "CRITICAL", "title": "Smurfing Pattern Detected",
@@ -197,7 +236,7 @@ _defaults = {
     "sar_history": [],
     "current_sar": None,
     "generation_error": None,
-    "cases": _sample_cases(),
+    "cases": _load_cases_from_supabase(),
     "alerts": _sample_alerts(),
     "audit_log": _sample_audit_log(),
     "users": {k: dict(v) for k, v in USERS.items()},

@@ -596,20 +596,181 @@ def page_case_management():
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: GENERATE SAR
 # ─────────────────────────────────────────────────────────────────────────────
+def _sample_customers():
+    return {
+        "Arjun Sharma (CUST-001) [HIGH]": {
+            "customer_id": "CUST-001", "customer_name": "Arjun Sharma",
+            "customer_type": "individual", "customer_risk_rating": "HIGH",
+            "occupation": "Import/Export Trader", "employer": "Sharma Trading Ltd",
+            "annual_income": "₹85,000", "nationality": "Indian",
+            "pep": False, "kyc_status": "VERIFIED",
+            "account_number": "ACC-10012201", "account_type": "current",
+            "account_balance": 125000,
+            "alerts": {
+                "[HIGH] STRUCTURING | ₹487,500 | ALT-2024-001": {
+                    "alert_id": "ALT-2024-001", "alert_type": "STRUCTURING", "severity": "HIGH",
+                    "alert_score": 94.5, "total_amount": 487500, "txn_count": 47,
+                    "date_from": "2024-01-08", "date_to": "2024-01-15",
+                    "jurisdictions": ["United Kingdom", "United Arab Emirates", "Hong Kong", "Cayman Islands"],
+                    "triggering_factors": [
+                        "47 incoming transfers from different source accounts in 7 days",
+                        "Immediate outbound international wire transfer of £485,000 following receipt",
+                        "Transaction amounts structured at £9,500–£9,999 range (below £10K threshold)",
+                        "Destination account in UAE — high-risk jurisdiction",
+                        "Activity inconsistent with stated occupation (Import/Export Trader) and income (£85K)",
+                    ],
+                    "transactions": [
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0001", "amount": 9800, "currency": "GBP", "transaction_date": "2024-01-08", "transaction_type": "wire", "direction": "inbound", "counterparty_name": "Various Sources", "counterparty_bank": "Barclays UK", "country": "United Kingdom", "purpose": "Trade payment", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0002", "amount": 9950, "currency": "GBP", "transaction_date": "2024-01-09", "transaction_type": "wire", "direction": "inbound", "counterparty_name": "Various Sources", "counterparty_bank": "HSBC UK", "country": "United Kingdom", "purpose": "Trade payment", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-0048", "amount": 485000, "currency": "GBP", "transaction_date": "2024-01-15", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Gulf Trade LLC", "counterparty_bank": "Emirates NBD", "country": "United Arab Emirates", "purpose": "Business investment", "is_flagged": True},
+                    ],
+                    "rule_triggers": [
+                        {"id": str(uuid.uuid4()), "rule_code": "STR001", "rule_description": "Multiple sub-threshold transactions to avoid reporting", "typology_code": "Structuring", "threshold_value": 10000, "actual_value": 9950, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "GEO002", "rule_description": "Wire transfer to high-risk jurisdiction (UAE)", "typology_code": "Jurisdiction Risk", "threshold_value": 1, "actual_value": 1, "breached": True},
+                    ],
+                },
+            },
+        },
+        "Elena Petrov (CUST-002) [VERY HIGH]": {
+            "customer_id": "CUST-002", "customer_name": "Elena Petrov",
+            "customer_type": "PEP", "customer_risk_rating": "VERY HIGH",
+            "occupation": "Government Official", "employer": "Ministry of Finance",
+            "annual_income": "₹3,20,000", "nationality": "Russian",
+            "pep": True, "kyc_status": "ENHANCED DUE DILIGENCE",
+            "account_number": "ACC-10023102", "account_type": "offshore",
+            "account_balance": 4500000,
+            "alerts": {
+                "[VERY HIGH] LAYERING | ₹2,850,000 | ALT-2024-002": {
+                    "alert_id": "ALT-2024-002", "alert_type": "LAYERING", "severity": "CRITICAL",
+                    "alert_score": 98.1, "total_amount": 2850000, "txn_count": 12,
+                    "date_from": "2024-01-10", "date_to": "2024-01-20",
+                    "jurisdictions": ["Russia", "Cyprus", "Cayman Islands", "British Virgin Islands"],
+                    "triggering_factors": [
+                        "PEP customer with 12 large offshore transfers in 10 days",
+                        "Funds routed through multiple shell company accounts",
+                        "Transfers to secrecy jurisdictions (BVI, Cayman Islands)",
+                        "No legitimate business rationale provided",
+                        "Transaction values inconsistent with declared government salary",
+                    ],
+                    "transactions": [
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-EP01", "amount": 950000, "currency": "USD", "transaction_date": "2024-01-10", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Meridian Holdings Ltd", "counterparty_bank": "Bank of Cyprus", "country": "Cyprus", "purpose": "Investment", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-EP02", "amount": 1200000, "currency": "USD", "transaction_date": "2024-01-15", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Sunridge BVI Inc", "counterparty_bank": "BVI Offshore Bank", "country": "British Virgin Islands", "purpose": "Loan repayment", "is_flagged": True},
+                    ],
+                    "rule_triggers": [
+                        {"id": str(uuid.uuid4()), "rule_code": "PEP001", "rule_description": "PEP high-value transaction without EDD clearance", "typology_code": "PEP Risk", "threshold_value": 100000, "actual_value": 950000, "breached": True},
+                        {"id": str(uuid.uuid4()), "rule_code": "LAY003", "rule_description": "Layering through offshore shell companies", "typology_code": "Layering", "threshold_value": 3, "actual_value": 12, "breached": True},
+                    ],
+                },
+            },
+        },
+        "Mohammed Al-Rashid (CUST-003) [HIGH]": {
+            "customer_id": "CUST-003", "customer_name": "Mohammed Al-Rashid",
+            "customer_type": "individual", "customer_risk_rating": "HIGH",
+            "occupation": "Real Estate Developer", "employer": "Al-Rashid Properties",
+            "annual_income": "₹5,00,000", "nationality": "Saudi Arabian",
+            "pep": False, "kyc_status": "VERIFIED",
+            "account_number": "ACC-10034503", "account_type": "current",
+            "account_balance": 890000,
+            "alerts": {
+                "[HIGH] SMURFING | ₹980,000 | ALT-2024-003": {
+                    "alert_id": "ALT-2024-003", "alert_type": "SMURFING", "severity": "HIGH",
+                    "alert_score": 88.7, "total_amount": 980000, "txn_count": 32,
+                    "date_from": "2024-01-05", "date_to": "2024-01-12",
+                    "jurisdictions": ["India", "United Arab Emirates", "Saudi Arabia"],
+                    "triggering_factors": [
+                        "32 cash deposits below ₹50,000 threshold within 7 days",
+                        "Deposits made at 11 different branch locations",
+                        "Total structured amount approaches ₹10L CTR threshold",
+                        "Inconsistent with customer's declared business activity",
+                    ],
+                    "transactions": [
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-AR01", "amount": 49500, "currency": "INR", "transaction_date": "2024-01-05", "transaction_type": "cash", "direction": "inbound", "counterparty_name": "Cash Deposit", "counterparty_bank": "HDFC Mumbai", "country": "India", "purpose": "Business income", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-AR02", "amount": 49800, "currency": "INR", "transaction_date": "2024-01-06", "transaction_type": "cash", "direction": "inbound", "counterparty_name": "Cash Deposit", "counterparty_bank": "HDFC Pune", "country": "India", "purpose": "Business income", "is_flagged": True},
+                    ],
+                    "rule_triggers": [
+                        {"id": str(uuid.uuid4()), "rule_code": "SMRF003", "rule_description": "Multiple sub-threshold cash deposits (smurfing pattern)", "typology_code": "Smurfing", "threshold_value": 50000, "actual_value": 49800, "breached": True},
+                    ],
+                },
+            },
+        },
+        "Li Wei Chen (CUST-004) [MEDIUM]": {
+            "customer_id": "CUST-004", "customer_name": "Li Wei Chen",
+            "customer_type": "entity", "customer_risk_rating": "MEDIUM",
+            "occupation": "Technology Consulting", "employer": "SinoTech Solutions Pvt Ltd",
+            "annual_income": "₹2,00,000", "nationality": "Chinese",
+            "pep": False, "kyc_status": "VERIFIED",
+            "account_number": "ACC-10045804", "account_type": "current",
+            "account_balance": 340000,
+            "alerts": {
+                "[MEDIUM] VELOCITY SPIKE | ₹1,250,000 | ALT-2024-004": {
+                    "alert_id": "ALT-2024-004", "alert_type": "VELOCITY SPIKE", "severity": "MEDIUM",
+                    "alert_score": 72.3, "total_amount": 1250000, "txn_count": 18,
+                    "date_from": "2024-01-18", "date_to": "2024-01-25",
+                    "jurisdictions": ["India", "China", "Singapore"],
+                    "triggering_factors": [
+                        "Transaction velocity 4.1x above 90-day moving average",
+                        "Sudden large outward remittances to China",
+                        "No corresponding increase in declared business revenue",
+                        "SWIFT transfers to newly registered counterparties",
+                    ],
+                    "transactions": [
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-LW01", "amount": 450000, "currency": "CNY", "transaction_date": "2024-01-18", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Shanghai Tech Co", "counterparty_bank": "Bank of China", "country": "China", "purpose": "Service fees", "is_flagged": True},
+                    ],
+                    "rule_triggers": [
+                        {"id": str(uuid.uuid4()), "rule_code": "VELOC005", "rule_description": "Transaction velocity exceeds 4x 90-day average", "typology_code": "Velocity", "threshold_value": 3, "actual_value": 4.1, "breached": True},
+                    ],
+                },
+            },
+        },
+        "Obiageli Nwosu (CUST-005) [HIGH]": {
+            "customer_id": "CUST-005", "customer_name": "Obiageli Nwosu",
+            "customer_type": "individual", "customer_risk_rating": "HIGH",
+            "occupation": "NGO Director", "employer": "Global Aid Foundation",
+            "annual_income": "₹1,50,000", "nationality": "Nigerian",
+            "pep": False, "kyc_status": "VERIFIED",
+            "account_number": "ACC-10056705", "account_type": "savings",
+            "account_balance": 215000,
+            "alerts": {
+                "[HIGH] TRADE FINANCE FRAUD | ₹3,400,000 | ALT-2024-005": {
+                    "alert_id": "ALT-2024-005", "alert_type": "TRADE FINANCE FRAUD", "severity": "HIGH",
+                    "alert_score": 91.2, "total_amount": 3400000, "txn_count": 8,
+                    "date_from": "2024-01-20", "date_to": "2024-01-28",
+                    "jurisdictions": ["Nigeria", "United Kingdom", "UAE", "India"],
+                    "triggering_factors": [
+                        "Invoices for non-existent goods used to justify large transfers",
+                        "Multiple round-number transfers inconsistent with trade patterns",
+                        "Counterparty flagged in previous SAR filings",
+                        "NGO account used for apparent commercial trade activity",
+                    ],
+                    "transactions": [
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-ON01", "amount": 1200000, "currency": "USD", "transaction_date": "2024-01-20", "transaction_type": "swift", "direction": "inbound", "counterparty_name": "Lagos Trading Co", "counterparty_bank": "Zenith Bank Nigeria", "country": "Nigeria", "purpose": "Aid contribution", "is_flagged": True},
+                        {"id": str(uuid.uuid4()), "transaction_ref": "TXN-ON02", "amount": 1200000, "currency": "USD", "transaction_date": "2024-01-21", "transaction_type": "swift", "direction": "outbound", "counterparty_name": "Falcon Investments", "counterparty_bank": "Standard Chartered UAE", "country": "United Arab Emirates", "purpose": "Grant disbursement", "is_flagged": True},
+                    ],
+                    "rule_triggers": [
+                        {"id": str(uuid.uuid4()), "rule_code": "TFF007", "rule_description": "Suspected trade finance fraud — invoice mismatch", "typology_code": "Trade Finance Fraud", "threshold_value": 500000, "actual_value": 1200000, "breached": True},
+                    ],
+                },
+            },
+        },
+    }
+
+
 def page_generate_sar():
-    st.markdown("## 🚀 Generate SAR Narrative")
     if not can_generate():
         st.warning("🔒 Read-only access: SAR generation requires ANALYST or ADMIN role.")
         return
-    st.divider()
 
-    # LLM config — auto-load from secrets if available
-    _secret_key = (st.secrets.get("GROQ_API_KEY") or st.secrets.get("OPENAI_API_KEY", ""))
-    _secret_provider = "Groq" if st.secrets.get("GROQ_API_KEY") else ("OpenAI" if st.secrets.get("OPENAI_API_KEY") else None)
+    # Auto-load API key from secrets
+    try:
+        _secret_key = (st.secrets.get("GROQ_API_KEY") or st.secrets.get("OPENAI_API_KEY", ""))
+        _secret_provider = "Groq" if st.secrets.get("GROQ_API_KEY") else ("OpenAI" if st.secrets.get("OPENAI_API_KEY") else None)
+    except Exception:
+        _secret_key = ""
+        _secret_provider = None
     if _secret_key:
-        if "_api_key" not in st.session_state or not st.session_state["_api_key"]:
+        if not st.session_state.get("_api_key"):
             st.session_state["_api_key"] = _secret_key
-        if "provider" not in st.session_state or not st.session_state["provider"]:
+        if not st.session_state.get("provider"):
             st.session_state["provider"] = _secret_provider
     else:
         with st.expander("🔑 LLM Configuration", expanded=not bool(st.session_state.get("_api_key"))):
@@ -618,184 +779,295 @@ def page_generate_sar():
                           placeholder="gsk_..." if st.session_state.get("provider", "Groq") == "Groq" else "sk-...",
                           key="_api_key")
 
-    tab_case, tab_txn, tab_rules, tab_gen = st.tabs(
-        ["📁 Case Details", "💸 Transactions", "⚠️ Rule Triggers", "🚀 Generate"])
+    st.markdown("""
+    <div style="background:linear-gradient(90deg,#0d2244,#1a3a6e);border-radius:10px;padding:20px 28px;margin-bottom:20px;">
+        <div style="font-size:1.6rem;font-weight:800;color:#fff;">🧾 SAR Narrative Generator</div>
+        <div style="color:#90caf9;font-size:0.95rem;margin-top:4px;">AI-powered narrative generation with full audit trail</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    with tab_case:
-        st.markdown('<div class="section-header">Customer & Case Information</div>', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            st.text_input("Case ID", value=f"CASE-{uuid.uuid4().hex[:8].upper()}", key="case_id_input")
-            st.text_input("Customer ID", placeholder="CUST-001", key="cust_id")
-            st.text_input("Customer Name", placeholder="John Doe", key="cust_name")
-            st.selectbox("Customer Type", ["individual", "entity", "PEP", "correspondent_bank"], key="cust_type")
-            st.selectbox("Customer Risk Rating", ["LOW", "MEDIUM", "HIGH", "CRITICAL"], key="risk_rating")
-        with col2:
-            st.text_input("Account Number", placeholder="ACC-123456", key="acc_num")
-            st.selectbox("Account Type", ["savings", "current", "offshore", "correspondent"], key="acc_type")
-            st.number_input("Account Balance (INR)", min_value=0.0, step=1000.0, key="acc_bal")
-            st.text_input("Alert ID", placeholder="ALT-2024-001", key="alert_id_input")
-            st.text_input("Alert Type", placeholder="e.g. Structuring, Layering", key="alert_type_input")
-            st.slider("Alert Score (0–100)", 0, 100, 75, key="alert_score")
-        st.text_area("Analyst Notes", placeholder="Additional context for the LLM…",
-                     height=100, key="analyst_notes")
+    tab_alert, tab_manual = st.tabs(["🔔 Generate from Alert", "✍️ Manual Entry"])
 
-    with tab_txn:
-        st.markdown('<div class="section-header">Add Transactions</div>', unsafe_allow_html=True)
-        with st.form("txn_form", clear_on_submit=True):
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                txn_ref = st.text_input("Transaction Ref", placeholder="TXN-001")
-                txn_amount = st.number_input("Amount", min_value=0.0, step=500.0)
-                txn_curr = st.selectbox("Currency", ["INR","USD","EUR","GBP","AED","SGD"])
-            with c2:
-                txn_date = st.date_input("Date")
-                txn_type = st.selectbox("Type", ["wire","cash","ach","swift","upi","rtgs","neft","crypto"])
-                txn_dir  = st.selectbox("Direction", ["outbound","inbound"])
-            with c3:
-                cpty = st.text_input("Counterparty Name")
-                cpty_bank = st.text_input("Counterparty Bank")
-                country = st.text_input("Country")
-                flagged = st.checkbox("Flagged")
-            purpose = st.text_input("Purpose / Narration")
-            if st.form_submit_button("➕ Add Transaction", type="primary", use_container_width=True):
-                st.session_state.transactions.append({
-                    "id": str(uuid.uuid4()),
-                    "transaction_ref": txn_ref or f"TXN-{len(st.session_state.transactions)+1:03d}",
-                    "amount": txn_amount, "currency": txn_curr,
-                    "transaction_date": str(txn_date), "transaction_type": txn_type,
-                    "direction": txn_dir, "counterparty_name": cpty,
-                    "counterparty_bank": cpty_bank, "country": country,
-                    "purpose": purpose, "is_flagged": flagged,
-                })
-                st.success(f"Added. Total: {len(st.session_state.transactions)}")
+    CUSTOMERS = _sample_customers()
 
-        if st.session_state.transactions:
-            import pandas as pd
-            df = pd.DataFrame(st.session_state.transactions)
-            cols = ["transaction_ref","amount","currency","transaction_date",
-                    "transaction_type","direction","counterparty_name","country","is_flagged"]
-            st.dataframe(df[[c for c in cols if c in df.columns]], use_container_width=True)
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Total Value", f"₹{sum(t['amount'] for t in st.session_state.transactions):,.0f}")
-            m2.metric("Flagged", sum(1 for t in st.session_state.transactions if t.get("is_flagged")))
-            m3.metric("Countries", len(set(t.get("country","") for t in st.session_state.transactions if t.get("country"))))
-            if st.button("🗑️ Clear All Transactions"):
-                st.session_state.transactions = []
-                st.rerun()
+    # ── TAB 1: GENERATE FROM ALERT ──────────────────────────────────────────
+    with tab_alert:
+        col_left, col_right = st.columns([1, 1])
 
-    with tab_rules:
-        SAMPLE_RULES = {
-            "STR001 – Cash threshold breach":      ("STR001","Cash transaction exceeds ₹10L threshold","Structuring",1000000),
-            "LAY002 – Layering via offshore":      ("LAY002","Multiple offshore wire transfers within 72h","Layering",3),
-            "SMRF003 – Smurfing pattern":          ("SMRF003","Multiple sub-threshold deposits detected","Smurfing",990000),
-            "PEP004 – PEP high-risk transaction":  ("PEP004","Politically Exposed Person high-value txn","PEP Risk",500000),
-            "VELOC005 – Velocity spike":           ("VELOC005","Transaction velocity 3x above 90-day avg","Velocity",3),
-            "CUSTOM – Enter manually": None,
-        }
-        preset = st.selectbox("Quick-fill from common rules", list(SAMPLE_RULES.keys()))
-        prefill = SAMPLE_RULES.get(preset)
-        with st.form("rule_form", clear_on_submit=True):
-            c1, c2 = st.columns(2)
-            with c1:
-                rule_code = st.text_input("Rule Code", value=prefill[0] if prefill else "")
-                rule_desc = st.text_input("Description", value=prefill[1] if prefill else "")
-                typology  = st.text_input("Typology", value=prefill[2] if prefill else "")
-            with c2:
-                threshold  = st.number_input("Threshold", value=float(prefill[3]) if prefill else 0.0)
-                actual_val = st.number_input("Actual Value", min_value=0.0, step=1.0)
-                breached   = st.checkbox("Threshold Breached", value=True)
-            if st.form_submit_button("➕ Add Rule Trigger", type="primary", use_container_width=True):
-                st.session_state.rule_triggers.append({
-                    "id": str(uuid.uuid4()),
-                    "rule_code": rule_code, "rule_description": rule_desc,
-                    "typology_code": typology, "threshold_value": threshold,
-                    "actual_value": actual_val, "breached": breached,
-                })
-                st.success(f"Added. Total: {len(st.session_state.rule_triggers)}")
-        if st.session_state.rule_triggers:
-            import pandas as pd
-            st.dataframe(pd.DataFrame(st.session_state.rule_triggers)
-                         [["rule_code","rule_description","typology_code","threshold_value","actual_value","breached"]],
-                         use_container_width=True)
-            if st.button("🗑️ Clear All Rules"):
-                st.session_state.rule_triggers = []
-                st.rerun()
+        with col_left:
+            st.markdown("### 1️⃣ Select Customer & Alert")
+            selected_cust_key = st.selectbox("Customer", list(CUSTOMERS.keys()), key="sel_cust")
+            cust = CUSTOMERS[selected_cust_key]
 
-    with tab_gen:
-        warnings = []
-        ak = st.session_state.get("_api_key","")
-        if not ak: warnings.append("⚠️ No API key configured. Add GROQ_API_KEY to Streamlit secrets.")
-        if not st.session_state.transactions: warnings.append("⚠️ No transactions added.")
-        if not st.session_state.rule_triggers: warnings.append("⚠️ No rule triggers added.")
-        for w in warnings: st.warning(w)
+            alert_keys = list(cust["alerts"].keys())
+            selected_alert_key = st.selectbox("Transaction Alert", alert_keys, key="sel_alert")
+            alert = cust["alerts"][selected_alert_key]
 
-        st.markdown(
-            f"Ready: **{st.session_state.get('cust_name','(unnamed)')}** | "
-            f"Transactions: **{len(st.session_state.transactions)}** | "
-            f"Rules breached: **{sum(1 for r in st.session_state.rule_triggers if r.get('breached'))}**"
-        )
+            st.markdown("**Customer Profile**")
+            risk_color = {"HIGH": "#e65100", "VERY HIGH": "#b71c1c", "CRITICAL": "#b71c1c",
+                          "MEDIUM": "#f57c00", "LOW": "#2e7d32"}.get(cust["customer_risk_rating"], "#888")
+            st.markdown(f"""
+            <div style="background:#0d2244;border:1px solid #1e3a5f;border-radius:10px;padding:16px;margin-top:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:1.1rem;font-weight:700;color:#e8eaf6;">{cust['customer_name']}</span>
+                    <span style="background:{risk_color};color:#fff;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">{cust['customer_risk_rating']}</span>
+                </div>
+                <div style="margin-top:10px;color:#cdd5e0;font-size:0.88rem;line-height:1.9;">
+                    🏢 {cust['occupation']} @ {cust['employer']}<br>
+                    💰 Annual Income: {cust['annual_income']}<br>
+                    🌍 Nationality: {cust['nationality']}<br>
+                    {'✅' if not cust['pep'] else '⚠️'} {'Non-PEP' if not cust['pep'] else 'PEP'} | KYC: {cust['kyc_status']}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        if st.button("🚀 Generate SAR Narrative", type="primary", use_container_width=True,
-                     disabled=not bool(ak)):
+        with col_right:
+            st.markdown("### 2️⃣ Alert Details")
+            sev_color = {"CRITICAL": "#b71c1c", "HIGH": "#e65100", "MEDIUM": "#f57c00", "LOW": "#2e7d32"}.get(alert["severity"], "#888")
+            factors_html = "".join(f"<li style='margin-bottom:6px;'>{f}</li>" for f in alert["triggering_factors"])
+            jur_str = ", ".join(alert["jurisdictions"])
+            st.markdown(f"""
+            <div style="background:#fff8e1;border-left:5px solid {sev_color};border-radius:8px;padding:16px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-weight:800;font-size:1rem;color:#1a1a1a;">{alert['alert_type']}</span>
+                    <span style="background:{sev_color};color:#fff;padding:3px 12px;border-radius:20px;font-size:0.76rem;font-weight:700;">{alert['severity']}</span>
+                </div>
+                <div style="margin-top:10px;color:#333;font-size:0.88rem;line-height:1.9;">
+                    🔥 Total: <b>₹{alert['total_amount']:,.2f}</b> across {alert['txn_count']} transactions<br>
+                    📅 {alert['date_from']} → {alert['date_to']}<br>
+                    🌍 Jurisdictions: {jur_str}<br>
+                    📊 Alert Score: <b>{alert['alert_score']}/100</b>
+                </div>
+            </div>
+            <div style="margin-top:12px;color:#1a1a1a;">
+                <b>Triggering Factors:</b>
+                <ul style="margin-top:8px;color:#333;font-size:0.9rem;">{factors_html}</ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.divider()
+        ak = st.session_state.get("_api_key", "")
+        if not ak:
+            st.warning("⚠️ No API key configured. Add GROQ_API_KEY to Streamlit secrets.")
+        if st.button("🚀 Generate SAR Narrative from Alert", type="primary", use_container_width=True, disabled=not bool(ak)):
             case_dict = {
-                "case_id": st.session_state.get("case_id_input",""),
-                "customer_id": st.session_state.get("cust_id",""),
-                "customer_name": st.session_state.get("cust_name",""),
-                "customer_type": st.session_state.get("cust_type",""),
-                "customer_risk_rating": st.session_state.get("risk_rating",""),
-                "account_number": st.session_state.get("acc_num",""),
-                "account_type": st.session_state.get("acc_type",""),
-                "account_balance": st.session_state.get("acc_bal",0),
-                "alert_id": st.session_state.get("alert_id_input",""),
-                "alert_type": st.session_state.get("alert_type_input",""),
-                "alert_score": st.session_state.get("alert_score",0),
-                "analyst_notes": st.session_state.get("analyst_notes",""),
+                "case_id": f"SAR-{uuid.uuid4().hex[:8].upper()}",
+                "customer_id": cust["customer_id"],
+                "customer_name": cust["customer_name"],
+                "customer_type": cust["customer_type"],
+                "customer_risk_rating": cust["customer_risk_rating"],
+                "account_number": cust["account_number"],
+                "account_type": cust["account_type"],
+                "account_balance": cust["account_balance"],
+                "alert_id": alert["alert_id"],
+                "alert_type": alert["alert_type"],
+                "alert_score": alert["alert_score"],
+                "analyst_notes": f"Triggering factors: {'; '.join(alert['triggering_factors'])}",
             }
             with st.spinner("🔄 Calling LLM… 15–30 seconds"):
                 try:
-                    result = generate_sar(case_dict, st.session_state.transactions,
-                                          st.session_state.rule_triggers, ak,
-                                          st.session_state.get("provider","Groq"))
+                    result = generate_sar(case_dict, alert["transactions"],
+                                          alert["rule_triggers"], ak,
+                                          st.session_state.get("provider", "Groq"))
                     st.session_state.current_sar = result
                     st.session_state.sar_history.append(result)
                     st.session_state.generation_error = None
-                    sev = result.get("severity","UNKNOWN")
+                    sev = result.get("severity", "UNKNOWN")
                     st.session_state.alerts.insert(0, {
                         "id": f"ALT-{uuid.uuid4().hex[:4].upper()}",
                         "severity": sev, "title": f"SAR Generated – {case_dict['case_id']}",
-                        "message": f"New SAR narrative for {case_dict['customer_name']}. Severity: {sev}",
-                        "time": "just now", "read": False,
-                        "case_id": case_dict["case_id"],
+                        "message": f"New SAR narrative for {cust['customer_name']}. Severity: {sev}",
+                        "time": "just now", "read": False, "case_id": case_dict["case_id"],
                     })
-                    st.success("✅ SAR generated successfully!")
+                    st.success("✅ SAR generated successfully! See output below.")
                 except Exception as exc:
                     st.session_state.generation_error = str(exc)
                     st.error(f"Generation failed: {exc}")
 
-        if st.session_state.generation_error:
-            st.error(st.session_state.generation_error)
+        _render_sar_output()
 
-        if st.session_state.current_sar:
-            sar = st.session_state.current_sar
-            sev = sar.get("severity","UNKNOWN")
-            st.divider()
-            s1, s2, s3 = st.columns(3)
-            s1.markdown(f'**Severity:** <span class="sev-{sev}">{sev}</span>', unsafe_allow_html=True)
-            s2.metric("Sentences", len(sar.get("sentences_with_hashes",[])))
-            s3.metric("Generated", sar.get("generated_at","")[:19].replace("T"," "))
-            st.markdown('<div class="section-header">📄 Section A — SAR Draft Narrative</div>', unsafe_allow_html=True)
-            st.markdown(sar["narrative"])
-            st.divider()
-            st.markdown('<div class="section-header">🔒 Sentence-Level SHA-256 Hashes</div>', unsafe_allow_html=True)
-            for entry in sar.get("sentences_with_hashes",[]):
-                with st.expander(entry["sentence"][:100]+("…" if len(entry["sentence"])>100 else ""), expanded=False):
-                    st.markdown(f'<div class="hash-box">{entry["hash"]}</div>', unsafe_allow_html=True)
-            audit_str = json.dumps({"hashes": sar.get("sentences_with_hashes",[]), "audit": sar.get("audit",{})},
-                                   indent=2, default=str)
-            st.download_button("⬇️ Download Audit JSON", data=audit_str,
-                               file_name=f"SAR_audit_{sar['case_id']}.json",
-                               mime="application/json", use_container_width=True)
+    # ── TAB 2: MANUAL ENTRY ──────────────────────────────────────────────────
+    with tab_manual:
+        tab_case, tab_txn, tab_rules, tab_gen = st.tabs(
+            ["📁 Case Details", "💸 Transactions", "⚠️ Rule Triggers", "🚀 Generate"])
+
+        with tab_case:
+            st.markdown('<div class="section-header">Customer & Case Information</div>', unsafe_allow_html=True)
+            col1, col2 = st.columns(2)
+            with col1:
+                st.text_input("Case ID", value=f"CASE-{uuid.uuid4().hex[:8].upper()}", key="case_id_input")
+                st.text_input("Customer ID", placeholder="CUST-001", key="cust_id")
+                st.text_input("Customer Name", placeholder="John Doe", key="cust_name")
+                st.selectbox("Customer Type", ["individual", "entity", "PEP", "correspondent_bank"], key="cust_type")
+                st.selectbox("Customer Risk Rating", ["LOW", "MEDIUM", "HIGH", "CRITICAL"], key="risk_rating")
+            with col2:
+                st.text_input("Account Number", placeholder="ACC-123456", key="acc_num")
+                st.selectbox("Account Type", ["savings", "current", "offshore", "correspondent"], key="acc_type")
+                st.number_input("Account Balance (INR)", min_value=0.0, step=1000.0, key="acc_bal")
+                st.text_input("Alert ID", placeholder="ALT-2024-001", key="alert_id_input")
+                st.text_input("Alert Type", placeholder="e.g. Structuring, Layering", key="alert_type_input")
+                st.slider("Alert Score (0–100)", 0, 100, 75, key="alert_score")
+            st.text_area("Analyst Notes", placeholder="Additional context for the LLM…",
+                         height=100, key="analyst_notes")
+
+        with tab_txn:
+            st.markdown('<div class="section-header">Add Transactions</div>', unsafe_allow_html=True)
+            with st.form("txn_form", clear_on_submit=True):
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    txn_ref = st.text_input("Transaction Ref", placeholder="TXN-001")
+                    txn_amount = st.number_input("Amount", min_value=0.0, step=500.0)
+                    txn_curr = st.selectbox("Currency", ["INR","USD","EUR","GBP","AED","SGD"])
+                with c2:
+                    txn_date = st.date_input("Date")
+                    txn_type = st.selectbox("Type", ["wire","cash","ach","swift","upi","rtgs","neft","crypto"])
+                    txn_dir  = st.selectbox("Direction", ["outbound","inbound"])
+                with c3:
+                    cpty = st.text_input("Counterparty Name")
+                    cpty_bank = st.text_input("Counterparty Bank")
+                    country = st.text_input("Country")
+                    flagged = st.checkbox("Flagged")
+                purpose = st.text_input("Purpose / Narration")
+                if st.form_submit_button("➕ Add Transaction", type="primary", use_container_width=True):
+                    st.session_state.transactions.append({
+                        "id": str(uuid.uuid4()),
+                        "transaction_ref": txn_ref or f"TXN-{len(st.session_state.transactions)+1:03d}",
+                        "amount": txn_amount, "currency": txn_curr,
+                        "transaction_date": str(txn_date), "transaction_type": txn_type,
+                        "direction": txn_dir, "counterparty_name": cpty,
+                        "counterparty_bank": cpty_bank, "country": country,
+                        "purpose": purpose, "is_flagged": flagged,
+                    })
+                    st.success(f"Added. Total: {len(st.session_state.transactions)}")
+
+            if st.session_state.transactions:
+                import pandas as pd
+                df = pd.DataFrame(st.session_state.transactions)
+                cols = ["transaction_ref","amount","currency","transaction_date",
+                        "transaction_type","direction","counterparty_name","country","is_flagged"]
+                st.dataframe(df[[c for c in cols if c in df.columns]], use_container_width=True)
+                m1, m2, m3 = st.columns(3)
+                m1.metric("Total Value", f"₹{sum(t['amount'] for t in st.session_state.transactions):,.0f}")
+                m2.metric("Flagged", sum(1 for t in st.session_state.transactions if t.get("is_flagged")))
+                m3.metric("Countries", len(set(t.get("country","") for t in st.session_state.transactions if t.get("country"))))
+                if st.button("🗑️ Clear All Transactions"):
+                    st.session_state.transactions = []
+                    st.rerun()
+
+        with tab_rules:
+            SAMPLE_RULES = {
+                "STR001 – Cash threshold breach":      ("STR001","Cash transaction exceeds ₹10L threshold","Structuring",1000000),
+                "LAY002 – Layering via offshore":      ("LAY002","Multiple offshore wire transfers within 72h","Layering",3),
+                "SMRF003 – Smurfing pattern":          ("SMRF003","Multiple sub-threshold deposits detected","Smurfing",990000),
+                "PEP004 – PEP high-risk transaction":  ("PEP004","Politically Exposed Person high-value txn","PEP Risk",500000),
+                "VELOC005 – Velocity spike":           ("VELOC005","Transaction velocity 3x above 90-day avg","Velocity",3),
+                "CUSTOM – Enter manually": None,
+            }
+            preset = st.selectbox("Quick-fill from common rules", list(SAMPLE_RULES.keys()))
+            prefill = SAMPLE_RULES.get(preset)
+            with st.form("rule_form", clear_on_submit=True):
+                c1, c2 = st.columns(2)
+                with c1:
+                    rule_code = st.text_input("Rule Code", value=prefill[0] if prefill else "")
+                    rule_desc = st.text_input("Description", value=prefill[1] if prefill else "")
+                    typology  = st.text_input("Typology", value=prefill[2] if prefill else "")
+                with c2:
+                    threshold  = st.number_input("Threshold", value=float(prefill[3]) if prefill else 0.0)
+                    actual_val = st.number_input("Actual Value", min_value=0.0, step=1.0)
+                    breached   = st.checkbox("Threshold Breached", value=True)
+                if st.form_submit_button("➕ Add Rule Trigger", type="primary", use_container_width=True):
+                    st.session_state.rule_triggers.append({
+                        "id": str(uuid.uuid4()),
+                        "rule_code": rule_code, "rule_description": rule_desc,
+                        "typology_code": typology, "threshold_value": threshold,
+                        "actual_value": actual_val, "breached": breached,
+                    })
+                    st.success(f"Added. Total: {len(st.session_state.rule_triggers)}")
+            if st.session_state.rule_triggers:
+                import pandas as pd
+                st.dataframe(pd.DataFrame(st.session_state.rule_triggers)
+                             [["rule_code","rule_description","typology_code","threshold_value","actual_value","breached"]],
+                             use_container_width=True)
+                if st.button("🗑️ Clear All Rules"):
+                    st.session_state.rule_triggers = []
+                    st.rerun()
+
+        with tab_gen:
+            warnings_list = []
+            ak = st.session_state.get("_api_key","")
+            if not ak: warnings_list.append("⚠️ No API key configured. Add GROQ_API_KEY to Streamlit secrets.")
+            if not st.session_state.transactions: warnings_list.append("⚠️ No transactions added.")
+            if not st.session_state.rule_triggers: warnings_list.append("⚠️ No rule triggers added.")
+            for w in warnings_list: st.warning(w)
+
+            st.markdown(
+                f"Ready: **{st.session_state.get('cust_name','(unnamed)')}** | "
+                f"Transactions: **{len(st.session_state.transactions)}** | "
+                f"Rules breached: **{sum(1 for r in st.session_state.rule_triggers if r.get('breached'))}**"
+            )
+
+            if st.button("🚀 Generate SAR Narrative", type="primary", use_container_width=True,
+                         disabled=not bool(ak)):
+                case_dict = {
+                    "case_id": st.session_state.get("case_id_input",""),
+                    "customer_id": st.session_state.get("cust_id",""),
+                    "customer_name": st.session_state.get("cust_name",""),
+                    "customer_type": st.session_state.get("cust_type",""),
+                    "customer_risk_rating": st.session_state.get("risk_rating",""),
+                    "account_number": st.session_state.get("acc_num",""),
+                    "account_type": st.session_state.get("acc_type",""),
+                    "account_balance": st.session_state.get("acc_bal",0),
+                    "alert_id": st.session_state.get("alert_id_input",""),
+                    "alert_type": st.session_state.get("alert_type_input",""),
+                    "alert_score": st.session_state.get("alert_score",0),
+                    "analyst_notes": st.session_state.get("analyst_notes",""),
+                }
+                with st.spinner("🔄 Calling LLM… 15–30 seconds"):
+                    try:
+                        result = generate_sar(case_dict, st.session_state.transactions,
+                                              st.session_state.rule_triggers, ak,
+                                              st.session_state.get("provider","Groq"))
+                        st.session_state.current_sar = result
+                        st.session_state.sar_history.append(result)
+                        st.session_state.generation_error = None
+                        sev = result.get("severity","UNKNOWN")
+                        st.session_state.alerts.insert(0, {
+                            "id": f"ALT-{uuid.uuid4().hex[:4].upper()}",
+                            "severity": sev, "title": f"SAR Generated – {case_dict['case_id']}",
+                            "message": f"New SAR narrative for {case_dict['customer_name']}. Severity: {sev}",
+                            "time": "just now", "read": False, "case_id": case_dict["case_id"],
+                        })
+                        st.success("✅ SAR generated successfully!")
+                    except Exception as exc:
+                        st.session_state.generation_error = str(exc)
+                        st.error(f"Generation failed: {exc}")
+
+            _render_sar_output()
+
+
+def _render_sar_output():
+    if st.session_state.generation_error:
+        st.error(st.session_state.generation_error)
+    if st.session_state.current_sar:
+        sar = st.session_state.current_sar
+        sev = sar.get("severity","UNKNOWN")
+        st.divider()
+        s1, s2, s3 = st.columns(3)
+        s1.markdown(f'**Severity:** <span class="sev-{sev}">{sev}</span>', unsafe_allow_html=True)
+        s2.metric("Sentences", len(sar.get("sentences_with_hashes",[])))
+        s3.metric("Generated", sar.get("generated_at","")[:19].replace("T"," "))
+        st.markdown('<div class="section-header">📄 Section A — SAR Draft Narrative</div>', unsafe_allow_html=True)
+        st.markdown(sar["narrative"])
+        st.divider()
+        st.markdown('<div class="section-header">🔒 Sentence-Level SHA-256 Hashes</div>', unsafe_allow_html=True)
+        for entry in sar.get("sentences_with_hashes",[]):
+            with st.expander(entry["sentence"][:100]+("…" if len(entry["sentence"])>100 else ""), expanded=False):
+                st.markdown(f'<div class="hash-box">{entry["hash"]}</div>', unsafe_allow_html=True)
+        audit_str = json.dumps({"hashes": sar.get("sentences_with_hashes",[]), "audit": sar.get("audit",{})},
+                               indent=2, default=str)
+        st.download_button("⬇️ Download Audit JSON", data=audit_str,
+                           file_name=f"SAR_audit_{sar['case_id']}.json",
+                           mime="application/json", use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: REVIEW & APPROVE

@@ -221,17 +221,28 @@ section[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
     background: #2d3748 !important;
 }
 
+/* Ensure all main content text is readable — base rule (must come first) */
+section[data-testid="stMain"] p,
+section[data-testid="stMain"] li,
+section[data-testid="stMain"] label,
+section[data-testid="stMain"] .stMarkdown {
+    color: #2d3748 !important;
+}
+
+/* Metric overrides — come after base rule so they take precedence */
 div[data-testid="stMetricValue"] {
     font-weight: 800 !important;
     color: #1a202c !important;
 }
 div[data-testid="stMetricLabel"] {
     font-weight: 600 !important;
-    color: #4a5568 !important;
+    color: #718096 !important;
     font-size: 0.78rem !important;
     text-transform: uppercase !important;
     letter-spacing: 1px !important;
 }
+
+/* Tab overrides — come after base rule */
 .stTabs [data-baseweb="tab"] {
     font-weight: 600 !important;
     font-size: 0.88rem !important;
@@ -239,14 +250,7 @@ div[data-testid="stMetricLabel"] {
 }
 .stTabs [aria-selected="true"] {
     color: #1a202c !important;
-}
-
-/* Ensure all main content text is readable */
-section[data-testid="stMain"] p,
-section[data-testid="stMain"] li,
-section[data-testid="stMain"] label,
-section[data-testid="stMain"] .stMarkdown {
-    color: #2d3748 !important;
+    border-bottom: 2px solid #1a202c !important;
 }
 
 /* Expanders */
@@ -713,8 +717,9 @@ def page_dashboard():
                 marker_colors=[colours.get(k, "#1e88e5") for k in sc.keys()],
             ))
             fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                              font_color="#cdd5e0", showlegend=True, height=280,
-                              margin=dict(t=10, b=10))
+                              font_color="#4a5568", showlegend=True, height=280,
+                              margin=dict(t=10, b=10),
+                              legend=dict(font=dict(color="#4a5568")))
             st.plotly_chart(fig, use_container_width=True)
         except ImportError:
             from collections import Counter
@@ -734,9 +739,10 @@ def page_dashboard():
                 x=list(sev_c.keys()), y=list(sev_c.values()),
                 marker_color=[sev_colours.get(k, "#1e88e5") for k in sev_c.keys()],
             ))
-            fig2.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                               font_color="#cdd5e0", height=280, margin=dict(t=10, b=10),
-                               xaxis=dict(gridcolor="#1e3a5f"), yaxis=dict(gridcolor="#1e3a5f"))
+            fig2.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#fafbfc",
+                               font_color="#4a5568", height=280, margin=dict(t=10, b=10),
+                               xaxis=dict(gridcolor="#e2e8f0", linecolor="#e2e8f0", tickfont=dict(color="#4a5568")),
+                               yaxis=dict(gridcolor="#e2e8f0", linecolor="#e2e8f0", tickfont=dict(color="#4a5568")))
             st.plotly_chart(fig2, use_container_width=True)
         except ImportError:
             from collections import Counter
@@ -1567,9 +1573,10 @@ def page_reports():
                 x=list(rc.keys()), y=list(rc.values()),
                 marker_color=["#388e3c","#fb8c00","#e53935","#b71c1c"],
             ))
-            fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                              font_color="#cdd5e0", height=260, margin=dict(t=10,b=10),
-                              xaxis=dict(gridcolor="#1e3a5f"), yaxis=dict(gridcolor="#1e3a5f"))
+            fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#fafbfc",
+                              font_color="#4a5568", height=260, margin=dict(t=10,b=10),
+                              xaxis=dict(gridcolor="#e2e8f0", linecolor="#e2e8f0", tickfont=dict(color="#4a5568")),
+                              yaxis=dict(gridcolor="#e2e8f0", linecolor="#e2e8f0", tickfont=dict(color="#4a5568")))
             st.plotly_chart(fig, use_container_width=True)
 
         with c2:
@@ -1577,7 +1584,8 @@ def page_reports():
             ac = Counter(c["alert_type"] for c in cases)
             fig2 = go.Figure(go.Pie(labels=list(ac.keys()), values=list(ac.values()), hole=0.4))
             fig2.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                               font_color="#cdd5e0", height=260, margin=dict(t=10,b=10))
+                               font_color="#4a5568", height=260, margin=dict(t=10,b=10),
+                               legend=dict(font=dict(color="#4a5568")))
             st.plotly_chart(fig2, use_container_width=True)
     except ImportError:
         st.info("Install plotly for charts: `pip install plotly`")

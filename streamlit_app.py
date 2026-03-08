@@ -603,12 +603,20 @@ def page_generate_sar():
         return
     st.divider()
 
-    # LLM config
-    with st.expander("🔑 LLM Configuration", expanded=not bool(st.session_state.get("_api_key"))):
-        provider = st.selectbox("Provider", ["Groq", "OpenAI"], key="provider")
-        api_key  = st.text_input("API Key", type="password",
-                                 placeholder="gsk_..." if st.session_state.get("provider","Groq")=="Groq" else "sk-...",
-                                 key="_api_key")
+    # LLM config — auto-load from secrets if available
+    _secret_key = (st.secrets.get("GROQ_API_KEY") or st.secrets.get("OPENAI_API_KEY", ""))
+    _secret_provider = "Groq" if st.secrets.get("GROQ_API_KEY") else ("OpenAI" if st.secrets.get("OPENAI_API_KEY") else None)
+    if _secret_key:
+        if "_api_key" not in st.session_state or not st.session_state["_api_key"]:
+            st.session_state["_api_key"] = _secret_key
+        if "provider" not in st.session_state or not st.session_state["provider"]:
+            st.session_state["provider"] = _secret_provider
+    else:
+        with st.expander("🔑 LLM Configuration", expanded=not bool(st.session_state.get("_api_key"))):
+            st.selectbox("Provider", ["Groq", "OpenAI"], key="provider")
+            st.text_input("API Key", type="password",
+                          placeholder="gsk_..." if st.session_state.get("provider", "Groq") == "Groq" else "sk-...",
+                          key="_api_key")
 
     tab_case, tab_txn, tab_rules, tab_gen = st.tabs(
         ["📁 Case Details", "💸 Transactions", "⚠️ Rule Triggers", "🚀 Generate"])
@@ -717,7 +725,7 @@ def page_generate_sar():
     with tab_gen:
         warnings = []
         ak = st.session_state.get("_api_key","")
-        if not ak: warnings.append("⚠️ No API key entered above.")
+        if not ak: warnings.append("⚠️ No API key configured. Add GROQ_API_KEY to Streamlit secrets.")
         if not st.session_state.transactions: warnings.append("⚠️ No transactions added.")
         if not st.session_state.rule_triggers: warnings.append("⚠️ No rule triggers added.")
         for w in warnings: st.warning(w)

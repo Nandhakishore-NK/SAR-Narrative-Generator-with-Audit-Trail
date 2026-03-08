@@ -961,13 +961,35 @@ def page_generate_sar():
                     st.session_state.sar_history.append(result)
                     st.session_state.generation_error = None
                     sev = result.get("severity", "UNKNOWN")
+                    # ── Upsert case into review queue ──────────────────────
+                    _new_case = {
+                        "case_id": case_dict["case_id"],
+                        "customer_name": cust["customer_name"],
+                        "risk_rating": cust["customer_risk_rating"],
+                        "status": "IN_REVIEW",
+                        "alert_type": case_dict["alert_type"],
+                        "created_at": datetime.now().strftime("%Y-%m-%d"),
+                    }
+                    existing_ids = [c["case_id"] for c in st.session_state.cases]
+                    if case_dict["case_id"] not in existing_ids:
+                        st.session_state.cases.insert(0, _new_case)
+                    else:
+                        for _c in st.session_state.cases:
+                            if _c["case_id"] == case_dict["case_id"]:
+                                _c["status"] = "IN_REVIEW"
+                    st.session_state.audit_log.insert(0, {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "user": st.session_state.get("username", "analyst"),
+                        "action": "STR_GENERATED", "case_id": case_dict["case_id"],
+                        "details": f"SAR narrative generated — severity {sev}. Moved to IN_REVIEW.",
+                    })
                     st.session_state.alerts.insert(0, {
                         "id": f"ALT-{uuid.uuid4().hex[:4].upper()}",
                         "severity": sev, "title": f"SAR Generated – {case_dict['case_id']}",
                         "message": f"New SAR narrative for {cust['customer_name']}. Severity: {sev}",
                         "time": "just now", "read": False, "case_id": case_dict["case_id"],
                     })
-                    st.success("✅ SAR generated successfully! See output below.")
+                    st.success("✅ SAR generated successfully! Case moved to Review & Approve queue.")
                 except Exception as exc:
                     st.session_state.generation_error = str(exc)
                     st.error(f"Generation failed: {exc}")
@@ -1133,13 +1155,35 @@ def page_generate_sar():
                     st.session_state.sar_history.append(result)
                     st.session_state.generation_error = None
                     sev = result.get("severity","UNKNOWN")
+                    # ── Upsert case into review queue ──────────────────────
+                    _new_case = {
+                        "case_id": case_dict["case_id"],
+                        "customer_name": case_dict["customer_name"],
+                        "risk_rating": case_dict["customer_risk_rating"] or st.session_state.get("risk_rating","MEDIUM"),
+                        "status": "IN_REVIEW",
+                        "alert_type": case_dict["alert_type"],
+                        "created_at": datetime.now().strftime("%Y-%m-%d"),
+                    }
+                    existing_ids = [c["case_id"] for c in st.session_state.cases]
+                    if case_dict["case_id"] not in existing_ids:
+                        st.session_state.cases.insert(0, _new_case)
+                    else:
+                        for _c in st.session_state.cases:
+                            if _c["case_id"] == case_dict["case_id"]:
+                                _c["status"] = "IN_REVIEW"
+                    st.session_state.audit_log.insert(0, {
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "user": st.session_state.get("username", "analyst"),
+                        "action": "STR_GENERATED", "case_id": case_dict["case_id"],
+                        "details": f"SAR narrative generated — severity {sev}. Moved to IN_REVIEW.",
+                    })
                     st.session_state.alerts.insert(0, {
                         "id": f"ALT-{uuid.uuid4().hex[:4].upper()}",
                         "severity": sev, "title": f"SAR Generated – {case_dict['case_id']}",
                         "message": f"New SAR narrative for {case_dict['customer_name']}. Severity: {sev}",
                         "time": "just now", "read": False, "case_id": case_dict["case_id"],
                     })
-                    st.success("✅ SAR generated successfully!")
+                    st.success("✅ SAR generated successfully! Case moved to Review & Approve queue.")
                 except Exception as exc:
                     st.session_state.generation_error = str(exc)
                     st.error(f"Generation failed: {exc}")

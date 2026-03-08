@@ -911,7 +911,7 @@ def page_generate_sar():
                     st.session_state.generation_error = str(exc)
                     st.error(f"Generation failed: {exc}")
 
-        _render_sar_output()
+        _render_sar_output(tab="alert")
 
     # ── TAB 2: MANUAL ENTRY ──────────────────────────────────────────────────
     with tab_manual:
@@ -1071,10 +1071,10 @@ def page_generate_sar():
                         st.session_state.generation_error = str(exc)
                         st.error(f"Generation failed: {exc}")
 
-            _render_sar_output()
+            _render_sar_output(tab="manual")
 
 
-def _render_sar_output():
+def _render_sar_output(tab: str = "alert"):
     if st.session_state.generation_error:
         st.error(st.session_state.generation_error)
     if st.session_state.current_sar:
@@ -1089,14 +1089,16 @@ def _render_sar_output():
         st.markdown(sar["narrative"])
         st.divider()
         st.markdown('<div class="section-header">🔒 Sentence-Level SHA-256 Hashes</div>', unsafe_allow_html=True)
-        for entry in sar.get("sentences_with_hashes",[]):
-            with st.expander(entry["sentence"][:100]+("…" if len(entry["sentence"])>100 else ""), expanded=False):
+        for i, entry in enumerate(sar.get("sentences_with_hashes",[])):
+            with st.expander(entry["sentence"][:100]+("…" if len(entry["sentence"])>100 else ""),
+                             expanded=False, key=f"exp_{tab}_{i}"):
                 st.markdown(f'<div class="hash-box">{entry["hash"]}</div>', unsafe_allow_html=True)
         audit_str = json.dumps({"hashes": sar.get("sentences_with_hashes",[]), "audit": sar.get("audit",{})},
                                indent=2, default=str)
         st.download_button("⬇️ Download Audit JSON", data=audit_str,
                            file_name=f"SAR_audit_{sar['case_id']}.json",
-                           mime="application/json", use_container_width=True)
+                           mime="application/json", use_container_width=True,
+                           key=f"dl_audit_{tab}")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: REVIEW & APPROVE

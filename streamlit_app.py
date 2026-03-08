@@ -976,16 +976,14 @@ def page_generate_sar():
 
     # ── TAB 2: MANUAL ENTRY ──────────────────────────────────────────────────
     with tab_manual:
-        tab_case, tab_txn, tab_rules, tab_gen = st.tabs(
-            ["📁 Case Details", "💸 Transactions", "⚠️ Rule Triggers", "🚀 Generate"])
 
-        with tab_case:
-            st.markdown('<div class="section-header">Customer & Case Information</div>', unsafe_allow_html=True)
+        # ── SECTION 1: Case & Customer Details ───────────────────────────────
+        with st.expander("📁 Step 1 — Customer & Case Information", expanded=True):
             col1, col2 = st.columns(2)
             with col1:
                 st.text_input("Case ID", value=f"CASE-{uuid.uuid4().hex[:8].upper()}", key="case_id_input")
                 st.text_input("Customer ID", placeholder="CUST-001", key="cust_id")
-                st.text_input("Customer Name", placeholder="John Doe", key="cust_name")
+                st.text_input("Customer Name", placeholder="Rajesh Kumar", key="cust_name")
                 st.selectbox("Customer Type", ["individual", "entity", "PEP", "correspondent_bank"], key="cust_type")
                 st.selectbox("Customer Risk Rating", ["LOW", "MEDIUM", "HIGH", "CRITICAL"], key="risk_rating")
             with col2:
@@ -998,51 +996,63 @@ def page_generate_sar():
             st.text_area("Analyst Notes", placeholder="Additional context for the LLM…",
                          height=100, key="analyst_notes")
 
-        with tab_txn:
-            st.markdown('<div class="section-header">Add Transactions</div>', unsafe_allow_html=True)
+        # ── SECTION 2: Transaction Details ───────────────────────────────────
+        txn_count = len(st.session_state.transactions)
+        txn_label = f"💸 Step 2 — Transaction Details ({txn_count} added)"
+        with st.expander(txn_label, expanded=True):
             with st.form("txn_form", clear_on_submit=True):
                 c1, c2, c3 = st.columns(3)
                 with c1:
-                    txn_ref = st.text_input("Transaction Ref", placeholder="TXN-001")
-                    txn_amount = st.number_input("Amount", min_value=0.0, step=500.0)
-                    txn_curr = st.selectbox("Currency", ["INR","USD","EUR","GBP","AED","SGD"])
+                    txn_ref    = st.text_input("Transaction Ref / UTR", placeholder="TXN-001 / UTIB2024...")
+                    txn_amount = st.number_input("Amount (INR)", min_value=0.0, step=500.0)
+                    txn_curr   = st.selectbox("Currency", ["INR","USD","EUR","GBP","AED","SGD","JPY","CNY"])
+                    txn_date   = st.date_input("Transaction Date")
                 with c2:
-                    txn_date = st.date_input("Date")
-                    txn_type = st.selectbox("Type", ["wire","cash","ach","swift","upi","rtgs","neft","crypto"])
+                    txn_type = st.selectbox("Transaction Type", ["cash","neft","rtgs","imps","upi","swift","wire","dd","cheque","crypto","ach"])
                     txn_dir  = st.selectbox("Direction", ["outbound","inbound"])
+                    txn_channel = st.selectbox("Channel", ["branch","net_banking","mobile_banking","atm","correspondent","other"])
+                    flagged  = st.checkbox("Flagged as Suspicious")
                 with c3:
-                    cpty = st.text_input("Counterparty Name")
-                    cpty_bank = st.text_input("Counterparty Bank")
-                    country = st.text_input("Country")
-                    flagged = st.checkbox("Flagged")
-                purpose = st.text_input("Purpose / Narration")
+                    sender_acc  = st.text_input("Sender Account No.", placeholder="1234567890")
+                    sender_ifsc = st.text_input("Sender Bank / IFSC", placeholder="HDFC0001234")
+                    cpty        = st.text_input("Beneficiary / Counterparty Name", placeholder="Offshore Holdings Ltd")
+                    cpty_acc    = st.text_input("Beneficiary Account No.", placeholder="9876543210")
+                    cpty_bank   = st.text_input("Beneficiary Bank / IFSC", placeholder="ICIC0005678")
+                    country     = st.text_input("Destination Country", placeholder="India")
+                purpose = st.text_input("Purpose / Narration / Remarks", placeholder="Payment for goods, Fund transfer…")
                 if st.form_submit_button("➕ Add Transaction", type="primary", use_container_width=True):
                     st.session_state.transactions.append({
                         "id": str(uuid.uuid4()),
                         "transaction_ref": txn_ref or f"TXN-{len(st.session_state.transactions)+1:03d}",
                         "amount": txn_amount, "currency": txn_curr,
                         "transaction_date": str(txn_date), "transaction_type": txn_type,
-                        "direction": txn_dir, "counterparty_name": cpty,
+                        "direction": txn_dir, "channel": txn_channel,
+                        "sender_account": sender_acc, "sender_bank_ifsc": sender_ifsc,
+                        "counterparty_name": cpty, "counterparty_account": cpty_acc,
                         "counterparty_bank": cpty_bank, "country": country,
                         "purpose": purpose, "is_flagged": flagged,
                     })
-                    st.success(f"Added. Total: {len(st.session_state.transactions)}")
+                    st.success(f"✅ Transaction added. Total: {len(st.session_state.transactions)}")
+                    st.rerun()
 
             if st.session_state.transactions:
                 import pandas as pd
                 df = pd.DataFrame(st.session_state.transactions)
-                cols = ["transaction_ref","amount","currency","transaction_date",
-                        "transaction_type","direction","counterparty_name","country","is_flagged"]
-                st.dataframe(df[[c for c in cols if c in df.columns]], use_container_width=True)
+                display_cols = ["transaction_ref","amount","currency","transaction_date",
+                                "transaction_type","direction","counterparty_name","country","is_flagged"]
+                st.dataframe(df[[c for c in display_cols if c in df.columns]], use_container_width=True)
                 m1, m2, m3 = st.columns(3)
-                m1.metric("Total Value (INR)", format_inr(sum(t['amount'] for t in st.session_state.transactions)))
+                m1.metric("Total Value", format_inr(sum(t['amount'] for t in st.session_state.transactions)))
                 m2.metric("Flagged", sum(1 for t in st.session_state.transactions if t.get("is_flagged")))
                 m3.metric("Countries", len(set(t.get("country","") for t in st.session_state.transactions if t.get("country"))))
-                if st.button("🗑️ Clear All Transactions"):
+                if st.button("🗑️ Clear All Transactions", key="clear_txns_manual"):
                     st.session_state.transactions = []
                     st.rerun()
 
-        with tab_rules:
+        # ── SECTION 3: Rule Triggers ──────────────────────────────────────────
+        rule_count = len(st.session_state.rule_triggers)
+        rule_label = f"⚠️ Step 3 — Rule Triggers ({rule_count} added)"
+        with st.expander(rule_label, expanded=True):
             SAMPLE_RULES = {
                 "CTR001 – Cash threshold breach (PMLA ₹10L)":   ("CTR001","Cash transaction ≥ ₹10L — CTR filing mandatory per PMLA 2002 Section 12 / RBI Master Direction","Structuring",1000000),
                 "STR001 – Suspicious transaction report":        ("STR001","Transaction inconsistent with customer profile — STR filing to FIU-IND under PMLA Section 12","Suspicious Activity",500000),
@@ -1072,67 +1082,69 @@ def page_generate_sar():
                         "typology_code": typology, "threshold_value": threshold,
                         "actual_value": actual_val, "breached": breached,
                     })
-                    st.success(f"Added. Total: {len(st.session_state.rule_triggers)}")
+                    st.success(f"✅ Rule trigger added. Total: {len(st.session_state.rule_triggers)}")
+                    st.rerun()
             if st.session_state.rule_triggers:
                 import pandas as pd
                 st.dataframe(pd.DataFrame(st.session_state.rule_triggers)
                              [["rule_code","rule_description","typology_code","threshold_value","actual_value","breached"]],
                              use_container_width=True)
-                if st.button("🗑️ Clear All Rules"):
+                if st.button("🗑️ Clear All Rules", key="clear_rules_manual"):
                     st.session_state.rule_triggers = []
                     st.rerun()
 
-        with tab_gen:
-            warnings_list = []
-            ak = st.session_state.get("_api_key","")
-            if not ak: warnings_list.append("⚠️ No API key configured. Add GROQ_API_KEY to Streamlit secrets.")
-            if not st.session_state.transactions: warnings_list.append("⚠️ No transactions added.")
-            if not st.session_state.rule_triggers: warnings_list.append("⚠️ No rule triggers added.")
-            for w in warnings_list: st.warning(w)
+        # ── SECTION 4: Generate ───────────────────────────────────────────────
+        st.divider()
+        warnings_list = []
+        ak = st.session_state.get("_api_key","")
+        if not ak: warnings_list.append("⚠️ No API key configured. Add GROQ_API_KEY to Streamlit secrets.")
+        if not st.session_state.transactions: warnings_list.append("⚠️ No transactions added yet (Step 2).")
+        if not st.session_state.rule_triggers: warnings_list.append("⚠️ No rule triggers added yet (Step 3).")
+        for w in warnings_list: st.warning(w)
 
-            st.markdown(
-                f"Ready: **{st.session_state.get('cust_name','(unnamed)')}** | "
-                f"Transactions: **{len(st.session_state.transactions)}** | "
-                f"Rules breached: **{sum(1 for r in st.session_state.rule_triggers if r.get('breached'))}**"
-            )
+        st.markdown(
+            f"Ready: **{st.session_state.get('cust_name','(unnamed)')}** | "
+            f"Transactions: **{len(st.session_state.transactions)}** | "
+            f"Rules breached: **{sum(1 for r in st.session_state.rule_triggers if r.get('breached'))}**"
+        )
 
-            if st.button("🚀 Generate SAR Narrative", type="primary", use_container_width=True,
-                         disabled=not bool(ak)):
-                case_dict = {
-                    "case_id": st.session_state.get("case_id_input",""),
-                    "customer_id": st.session_state.get("cust_id",""),
-                    "customer_name": st.session_state.get("cust_name",""),
-                    "customer_type": st.session_state.get("cust_type",""),
-                    "customer_risk_rating": st.session_state.get("risk_rating",""),
-                    "account_number": st.session_state.get("acc_num",""),
-                    "account_type": st.session_state.get("acc_type",""),
-                    "account_balance": st.session_state.get("acc_bal",0),
-                    "alert_id": st.session_state.get("alert_id_input",""),
-                    "alert_type": st.session_state.get("alert_type_input",""),
-                    "alert_score": st.session_state.get("alert_score",0),
-                    "analyst_notes": st.session_state.get("analyst_notes",""),
-                }
-                with st.spinner("🔄 Calling LLM… 15–30 seconds"):
-                    try:
-                        result = generate_sar(case_dict, st.session_state.transactions,
-                                              st.session_state.rule_triggers, ak,
-                                              st.session_state.get("provider","Groq"))
-                        st.session_state.current_sar = result
-                        st.session_state.sar_history.append(result)
-                        st.session_state.generation_error = None
-                        sev = result.get("severity","UNKNOWN")
-                        st.session_state.alerts.insert(0, {
-                            "id": f"ALT-{uuid.uuid4().hex[:4].upper()}",
-                            "severity": sev, "title": f"SAR Generated – {case_dict['case_id']}",
-                            "message": f"New SAR narrative for {case_dict['customer_name']}. Severity: {sev}",
-                            "time": "just now", "read": False, "case_id": case_dict["case_id"],
-                        })
-                        st.success("✅ SAR generated successfully!")
-                    except Exception as exc:
-                        st.session_state.generation_error = str(exc)
-                        st.error(f"Generation failed: {exc}")
+        if st.button("🚀 Generate SAR Narrative", type="primary", use_container_width=True,
+                     disabled=not bool(ak)):
+            case_dict = {
+                "case_id": st.session_state.get("case_id_input",""),
+                "customer_id": st.session_state.get("cust_id",""),
+                "customer_name": st.session_state.get("cust_name",""),
+                "customer_type": st.session_state.get("cust_type",""),
+                "customer_risk_rating": st.session_state.get("risk_rating",""),
+                "account_number": st.session_state.get("acc_num",""),
+                "account_type": st.session_state.get("acc_type",""),
+                "account_balance": st.session_state.get("acc_bal",0),
+                "alert_id": st.session_state.get("alert_id_input",""),
+                "alert_type": st.session_state.get("alert_type_input",""),
+                "alert_score": st.session_state.get("alert_score",0),
+                "analyst_notes": st.session_state.get("analyst_notes",""),
+            }
+            with st.spinner("🔄 Calling LLM… 15–30 seconds"):
+                try:
+                    result = generate_sar(case_dict, st.session_state.transactions,
+                                          st.session_state.rule_triggers, ak,
+                                          st.session_state.get("provider","Groq"))
+                    st.session_state.current_sar = result
+                    st.session_state.sar_history.append(result)
+                    st.session_state.generation_error = None
+                    sev = result.get("severity","UNKNOWN")
+                    st.session_state.alerts.insert(0, {
+                        "id": f"ALT-{uuid.uuid4().hex[:4].upper()}",
+                        "severity": sev, "title": f"SAR Generated – {case_dict['case_id']}",
+                        "message": f"New SAR narrative for {case_dict['customer_name']}. Severity: {sev}",
+                        "time": "just now", "read": False, "case_id": case_dict["case_id"],
+                    })
+                    st.success("✅ SAR generated successfully!")
+                except Exception as exc:
+                    st.session_state.generation_error = str(exc)
+                    st.error(f"Generation failed: {exc}")
 
-            _render_sar_output(tab="manual")
+        _render_sar_output(tab="manual")
 
 
 def _render_sar_output(tab: str = "alert"):

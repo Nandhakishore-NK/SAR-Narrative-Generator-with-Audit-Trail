@@ -152,16 +152,42 @@ section[data-testid="stSidebar"] * { color: #1a202c !important; }
 
 /* ── Streamlit native overrides ──────────────────────────────────────── */
 
-/* All buttons: clean rounded style */
+/* Base: all buttons get rounded corners */
 .stButton > button {
     border-radius: 6px !important;
     font-weight: 600 !important;
     font-size: 0.88rem !important;
     letter-spacing: 0.2px !important;
+}
+
+/* Secondary buttons (default) in main content — white bg, dark text */
+.stButton > button[kind="secondary"] {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e0 !important;
+    color: #1a202c !important;
+}
+.stButton > button[kind="secondary"]:hover {
+    background: #f7fafc !important;
+    border-color: #a0aec0 !important;
     color: #1a202c !important;
 }
 
-/* Sidebar nav buttons — secondary (inactive) */
+/* Primary buttons in main content — dark bg, white text */
+.stButton > button[kind="primary"] {
+    background: #1a202c !important;
+    border: none !important;
+    color: #ffffff !important;
+}
+.stButton > button[kind="primary"] p,
+.stButton > button[kind="primary"] span {
+    color: #ffffff !important;
+}
+.stButton > button[kind="primary"]:hover {
+    background: #2d3748 !important;
+}
+
+/* ── Sidebar nav buttons ────────────────────────────────────────────── */
+/* Inactive nav item */
 section[data-testid="stSidebar"] .stButton > button {
     background: transparent !important;
     border: 1px solid #e2e8f0 !important;
@@ -169,13 +195,17 @@ section[data-testid="stSidebar"] .stButton > button {
     text-align: left !important;
     justify-content: flex-start !important;
 }
+section[data-testid="stSidebar"] .stButton > button p,
+section[data-testid="stSidebar"] .stButton > button span {
+    color: #4a5568 !important;
+}
 section[data-testid="stSidebar"] .stButton > button:hover {
     background: #f7fafc !important;
     color: #1a202c !important;
     border-color: #cbd5e0 !important;
 }
 
-/* Sidebar nav buttons — primary (active page) */
+/* Active nav item — dark bg, white text */
 section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
     background: #1a202c !important;
     border: none !important;
@@ -183,18 +213,11 @@ section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
     text-align: left !important;
     justify-content: flex-start !important;
 }
-section[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
-    background: #2d3748 !important;
-}
-
-/* Main content primary buttons */
-.main .stButton > button[kind="primary"],
-section[data-testid="stMain"] .stButton > button[kind="primary"] {
-    background: #1a202c !important;
-    border: none !important;
+section[data-testid="stSidebar"] .stButton > button[kind="primary"] p,
+section[data-testid="stSidebar"] .stButton > button[kind="primary"] span {
     color: #ffffff !important;
 }
-section[data-testid="stMain"] .stButton > button[kind="primary"]:hover {
+section[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
     background: #2d3748 !important;
 }
 

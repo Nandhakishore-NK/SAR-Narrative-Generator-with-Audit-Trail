@@ -37,70 +37,141 @@ st.set_page_config(
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* Login card */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ── Global reset ─────────────────────────────────────────────────────── */
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Light background for the whole app */
+.stApp {
+    background: #f5f6fa !important;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+    background: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+section[data-testid="stSidebar"] * { color: #1a202c !important; }
+.sidebar-logo {
+    font-size: 1.25rem; font-weight: 900; color: #1a202c !important;
+    letter-spacing: -0.5px;
+}
+.sidebar-user  { font-size: 0.88rem; color: #4a5568 !important; }
+
+/* role badges */
+.role-badge    { display:inline-block; padding:2px 10px; border-radius:4px;
+                 font-size:0.65rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+.role-ADMIN      { background:#1a202c; color:white !important; }
+.role-SUPERVISOR { background:#2b6cb0; color:white !important; }
+.role-ANALYST    { background:#276749; color:white !important; }
+.role-READ_ONLY  { background:#718096; color:white !important; }
+
+/* ── Login page ───────────────────────────────────────────────────────── */
 .login-card {
-    background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 100%);
-    border: 1px solid #1e3a5f;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 40px;
     max-width: 420px;
     margin: 60px auto;
     text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
 }
-.login-title { font-size: 1.6rem; font-weight: 700; color: #e8eaf6; margin-bottom: 4px; }
-.login-sub   { font-size: 0.9rem; color: #90caf9; margin-bottom: 24px; }
+.login-title { font-size: 1.7rem; font-weight: 900; color: #1a202c; margin-bottom: 4px; letter-spacing:-0.5px; }
+.login-sub   { font-size: 0.88rem; color: #718096; margin-bottom: 24px; }
 
-/* Sidebar */
-section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0a1628 0%, #0d2244 60%, #0a1628 100%);
-    border-right: 1px solid #1e3a5f;
+/* ── Section label (small-caps tag above headings) ───────────────────── */
+.track-label {
+    display: inline-block;
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    border: 1px solid #2b6cb0; color: #2b6cb0;
+    padding: 2px 10px; border-radius: 20px; margin-bottom: 8px;
 }
-.sidebar-logo  { font-size: 1.3rem; font-weight: 800; color: #1e88e5; letter-spacing: 1px; }
-.sidebar-user  { font-size: 0.9rem; color: #cdd5e0; }
-.role-badge    { display:inline-block; padding:2px 10px; border-radius:12px;
-                 font-size:0.7rem; font-weight:700; letter-spacing:1px; }
-.role-ADMIN      { background:#1565c0; color:white; }
-.role-SUPERVISOR { background:#6a1b9a; color:white; }
-.role-ANALYST    { background:#00695c; color:white; }
-.role-READ_ONLY  { background:#37474f; color:white; }
 
-/* Alerts */
+/* ── Section header (replaces old blue band) ─────────────────────────── */
+.section-header {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: #2b6cb0; margin-bottom: 10px; margin-top: 4px;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────── */
+.sar-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* ── Metric card ─────────────────────────────────────────────────────── */
+.metric-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.metric-val   { font-size: 2rem; font-weight: 900; color: #2b6cb0; }
+.metric-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #718096; margin-top: 4px; }
+
+/* ── Alert cards ─────────────────────────────────────────────────────── */
 .alert-card {
     border-radius: 10px;
     padding: 14px 18px;
     margin-bottom: 12px;
-    border-left: 5px solid;
+    border-left: 4px solid;
+    background: #ffffff;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
     position: relative;
 }
-.alert-CRITICAL { background: rgba(183,28,28,0.15); border-color: #b71c1c; }
-.alert-HIGH     { background: rgba(229,57,53,0.12); border-color: #e53935; }
-.alert-MEDIUM   { background: rgba(251,140,0,0.12); border-color: #fb8c00; }
-.alert-LOW      { background: rgba(56,142,60,0.12); border-color: #388e3c; }
-.unread-dot     { display:inline-block; width:8px; height:8px; background:#1e88e5;
+.alert-CRITICAL { border-color: #c53030; }
+.alert-HIGH     { border-color: #dd6b20; }
+.alert-MEDIUM   { border-color: #d69e2e; }
+.alert-LOW      { border-color: #276749; }
+.unread-dot     { display:inline-block; width:7px; height:7px; background:#2b6cb0;
                   border-radius:50%; margin-right:8px; vertical-align:middle; }
 
-/* Severity badges */
-.sev-CRITICAL { background:#b71c1c; color:white; padding:3px 10px; border-radius:6px; font-weight:700; font-size:0.8rem; }
-.sev-HIGH     { background:#e53935; color:white; padding:3px 10px; border-radius:6px; font-weight:700; font-size:0.8rem; }
-.sev-MEDIUM   { background:#fb8c00; color:white; padding:3px 10px; border-radius:6px; font-weight:700; font-size:0.8rem; }
-.sev-LOW      { background:#388e3c; color:white; padding:3px 10px; border-radius:6px; font-weight:700; font-size:0.8rem; }
+/* ── Severity badges ─────────────────────────────────────────────────── */
+.sev-CRITICAL { background:#c53030; color:white; padding:2px 10px; border-radius:4px; font-weight:700; font-size:0.72rem; letter-spacing:1px; }
+.sev-HIGH     { background:#dd6b20; color:white; padding:2px 10px; border-radius:4px; font-weight:700; font-size:0.72rem; letter-spacing:1px; }
+.sev-MEDIUM   { background:#d69e2e; color:white; padding:2px 10px; border-radius:4px; font-weight:700; font-size:0.72rem; letter-spacing:1px; }
+.sev-LOW      { background:#276749; color:white; padding:2px 10px; border-radius:4px; font-weight:700; font-size:0.72rem; letter-spacing:1px; }
 
-/* Misc */
-.section-header {
-    font-size: 1.05rem; font-weight: 600; color: #e8eaf6;
-    background: #1565c0; padding: 6px 14px; border-radius: 6px; margin-bottom: 10px;
+/* ── Hash box ────────────────────────────────────────────────────────── */
+.hash-box {
+    font-family: 'Courier New', monospace; font-size: 0.75rem;
+    color: #4a5568; background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 10px; border-radius: 6px;
 }
-.hash-box { font-family:monospace; font-size:0.75rem; color:#90caf9;
-            background:#0d1117; padding:4px 8px; border-radius:4px; }
-.metric-card {
-    background: linear-gradient(135deg, #0a1628, #1a2a4a);
-    border: 1px solid #1e3a5f;
-    border-radius: 12px;
-    padding: 18px;
-    text-align: center;
+
+/* ── Streamlit native overrides ──────────────────────────────────────── */
+.stButton > button {
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
 }
-.metric-val   { font-size: 2rem; font-weight: 800; color: #1e88e5; }
-.metric-label { font-size: 0.8rem; color: #90caf9; margin-top: 4px; }
+.stButton > button[kind="primary"] {
+    background: #1a202c !important;
+    border: none !important;
+    color: white !important;
+}
+.stButton > button[kind="primary"]:hover {
+    background: #2d3748 !important;
+}
+div[data-testid="stMetricValue"] {
+    font-weight: 800 !important;
+    color: #1a202c !important;
+}
+.stTabs [data-baseweb="tab"] {
+    font-weight: 600 !important;
+    font-size: 0.88rem !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -427,10 +498,13 @@ def page_login():
     col_l, col_m, col_r = st.columns([1, 1.2, 1])
     with col_m:
         st.markdown("""
-        <div style="text-align:center; padding-top:80px;">
-            <img src="https://img.icons8.com/color/96/bank.png" width="72" style="margin-bottom:12px"/>
-            <div class="login-title">SAR Narrative Generator</div>
-            <div class="login-sub">India AML Compliance Platform — PMLA 2002 / FIU-IND</div>
+        <div style="text-align:center; padding-top:60px; padding-bottom:20px;">
+            <div style="font-size:0.65rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+                        color:#2b6cb0;border:1px solid #bee3f8;display:inline-block;
+                        padding:3px 14px;border-radius:20px;margin-bottom:14px;">AML COMPLIANCE PLATFORM</div>
+            <div class="login-title">SAR Guardian</div>
+            <div style="font-size:1rem;font-weight:700;color:#2b6cb0;font-style:italic;margin-bottom:6px;">PMLA 2002 / FIU-IND</div>
+            <div class="login-sub">India's AI-powered STR narrative generation platform</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -449,9 +523,9 @@ def page_login():
                     st.error("Invalid credentials or account inactive.")
 
         st.markdown("""
-        <div style="background:rgba(30,136,229,0.1); border:1px solid #1e3a5f;
-                    border-radius:10px; padding:14px; margin-top:16px; font-size:0.82rem; color:#90caf9;">
-        <b>Demo Credentials:</b><br>
+        <div style="background:#f7fafc; border:1px solid #e2e8f0;
+                    border-radius:10px; padding:14px; margin-top:16px; font-size:0.82rem; color:#4a5568;">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#2b6cb0;margin-bottom:6px;">DEMO CREDENTIALS</div>
         👤 admin / Admin@2024! &nbsp;|&nbsp; analyst1 / Analyst@2024!<br>
         supervisor1 / Supervisor@2024! &nbsp;|&nbsp; readonly1 / Readonly@2024!
         </div>
@@ -465,7 +539,7 @@ def render_sidebar():
         st.markdown("""
         <div style="padding:16px 0 8px;">
             <div class="sidebar-logo">🛡️ SAR Guardian</div>
-            <div style="font-size:0.7rem; color:#5c7a9e; letter-spacing:2px;">FIU-IND | PMLA 2002</div>
+            <div style="font-size:0.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#718096;">FIU-IND | PMLA 2002</div>
         </div>
         """, unsafe_allow_html=True)
         st.divider()
@@ -474,9 +548,9 @@ def render_sidebar():
         r = u.get("role", "")
         st.markdown(f"""
         <div class="sidebar-user">
-            <b style="color:#e8eaf6;">{u.get("name","")}</b><br>
+            <b style="color:#1a202c;font-size:0.9rem;">{u.get("name","")}</b><br>
             <span class="role-badge role-{r}">{r}</span>
-            <br><small style="color:#5c7a9e;">{u.get("department","")}</small>
+            <br><small style="color:#718096;">{u.get("department","")}</small>
         </div>
         """, unsafe_allow_html=True)
         st.divider()
@@ -599,8 +673,8 @@ def page_dashboard():
             st.markdown(
                 f"<div class='alert-card alert-{a['severity']}'>"
                 f"<b>{icon} {unread} {a['title']}</b><br>"
-                f"<small style='color:#90caf9;'>{a['message'][:80]}…</small><br>"
-                f"<small style='color:#5c7a9e;'>{a['time']} | Case: {a['case_id']}</small>"
+                f"<small style='color:#4a5568;'>{a['message'][:80]}…</small><br>"
+                f"<small style='color:#718096;'>{a['time']} | Case: {a['case_id']}</small>"
                 f"</div>",
                 unsafe_allow_html=True,
             )
@@ -613,7 +687,7 @@ def page_dashboard():
         for entry in st.session_state.audit_log[:4]:
             st.markdown(
                 f"**{entry['action']}** — {entry['user']}  \n"
-                f"<small style='color:#5c7a9e;'>{entry['timestamp']} | {entry['details']}</small>",
+                f"<small style='color:#718096;'>{entry['timestamp']} | {entry['details']}</small>",
                 unsafe_allow_html=True,
             )
             st.markdown("---")
@@ -874,9 +948,12 @@ def page_generate_sar():
                           key="_api_key")
 
     st.markdown("""
-    <div style="background:linear-gradient(90deg,#0d2244,#1a3a6e);border-radius:10px;padding:20px 28px;margin-bottom:20px;">
-        <div style="font-size:1.6rem;font-weight:800;color:#fff;">🧾 STR / SAR Narrative Generator</div>
-        <div style="color:#90caf9;font-size:0.95rem;margin-top:4px;">AI-powered STR narrative generation — PMLA 2002 | FIU-IND | RBI compliant</div>
+    <div style="margin-bottom:20px;">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+                    color:#2b6cb0;border:1px solid #bee3f8;display:inline-block;
+                    padding:3px 12px;border-radius:20px;margin-bottom:10px;">STR / SAR NARRATIVE GENERATOR</div>
+        <div style="font-size:1.8rem;font-weight:900;color:#1a202c;letter-spacing:-0.5px;">Generate. Review. <span style="color:#2b6cb0;font-style:italic;">Submit.</span></div>
+        <div style="color:#718096;font-size:0.9rem;margin-top:4px;">AI-powered STR narrative — PMLA 2002 | FIU-IND | RBI compliant</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -898,15 +975,16 @@ def page_generate_sar():
             alert = cust["alerts"][selected_alert_key]
 
             st.markdown("**Customer Profile**")
-            risk_color = {"HIGH": "#e65100", "VERY HIGH": "#b71c1c", "CRITICAL": "#b71c1c",
-                          "MEDIUM": "#f57c00", "LOW": "#2e7d32"}.get(cust["customer_risk_rating"], "#888")
+            risk_color = {"HIGH": "#dd6b20", "VERY HIGH": "#c53030", "CRITICAL": "#c53030",
+                          "MEDIUM": "#d69e2e", "LOW": "#276749"}.get(cust["customer_risk_rating"], "#718096")
             st.markdown(f"""
-            <div style="background:#0d2244;border:1px solid #1e3a5f;border-radius:10px;padding:16px;margin-top:8px;">
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-top:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                <div style="font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#718096;margin-bottom:6px;">CUSTOMER PROFILE</div>
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-size:1.1rem;font-weight:700;color:#e8eaf6;">{cust['customer_name']}</span>
-                    <span style="background:{risk_color};color:#fff;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">{cust['customer_risk_rating']}</span>
+                    <span style="font-size:1rem;font-weight:800;color:#1a202c;">{cust['customer_name']}</span>
+                    <span style="background:{risk_color};color:#fff;padding:2px 10px;border-radius:4px;font-size:0.65rem;font-weight:700;letter-spacing:1px;">{cust['customer_risk_rating']}</span>
                 </div>
-                <div style="margin-top:10px;color:#cdd5e0;font-size:0.88rem;line-height:1.9;">
+                <div style="margin-top:10px;color:#4a5568;font-size:0.86rem;line-height:1.8;">
                     🏢 {cust['occupation']} @ {cust['employer']}<br>
                     💰 Annual Income: {cust['annual_income']}<br>
                     🌍 Nationality: {cust['nationality']}<br>
@@ -917,23 +995,24 @@ def page_generate_sar():
 
         with col_right:
             st.markdown("### 2️⃣ Alert Details")
-            sev_color = {"CRITICAL": "#b71c1c", "HIGH": "#e65100", "MEDIUM": "#f57c00", "LOW": "#2e7d32"}.get(alert["severity"], "#888")
-            factors_html = "".join(f"<li style='margin-bottom:6px;'>{f}</li>" for f in alert["triggering_factors"])
+            sev_color = {"CRITICAL": "#c53030", "HIGH": "#dd6b20", "MEDIUM": "#d69e2e", "LOW": "#276749"}.get(alert["severity"], "#718096")
+            factors_html = "".join(f"<li style='margin-bottom:6px;color:#4a5568;'>{f}</li>" for f in alert["triggering_factors"])
             jur_str = ", ".join(alert["jurisdictions"])
             st.markdown(f"""
-            <div style="background:#fff8e1;border-left:5px solid {sev_color};border-radius:8px;padding:16px;margin-bottom:12px;">
+            <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid {sev_color};border-radius:8px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                <div style="font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#718096;margin-bottom:6px;">ALERT DETAILS</div>
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-weight:800;font-size:1rem;color:#1a1a1a;">{alert['alert_type']}</span>
-                    <span style="background:{sev_color};color:#fff;padding:3px 12px;border-radius:20px;font-size:0.76rem;font-weight:700;">{alert['severity']}</span>
+                    <span style="font-weight:900;font-size:0.95rem;color:#1a202c;">{alert['alert_type']}</span>
+                    <span style="background:{sev_color};color:#fff;padding:2px 10px;border-radius:4px;font-size:0.65rem;font-weight:700;letter-spacing:1px;">{alert['severity']}</span>
                 </div>
-                <div style="margin-top:10px;color:#333;font-size:0.88rem;line-height:1.9;">
-                    🔥 Total: <b>{format_inr(alert['total_amount'])}</b> across {alert['txn_count']} transactions<br>
+                <div style="margin-top:10px;color:#4a5568;font-size:0.86rem;line-height:1.8;">
+                    🔥 Total: <b style='color:#1a202c;'>{format_inr(alert['total_amount'])}</b> across {alert['txn_count']} transactions<br>
                     📅 {alert['date_from']} → {alert['date_to']}<br>
                     🌍 Jurisdictions: {jur_str}<br>
-                    📊 Alert Score: <b>{alert['alert_score']}/100</b>
+                    📊 Alert Score: <b style='color:#1a202c;'>{alert['alert_score']}/100</b>
                 </div>
             </div>
-            <div style="margin-top:12px;color:#1a1a1a;">
+            <div style="margin-top:12px;color:#1a202c;">
                 <b>Triggering Factors:</b>
                 <ul style="margin-top:8px;color:#333;font-size:0.9rem;">{factors_html}</ul>
             </div>
@@ -1318,8 +1397,8 @@ def page_alerts():
                 f"{icon} {unread_indicator}{a['title']}"
                 f"  <span class='sev-{a['severity']}'>{a['severity']}</span>"
                 f"</div>"
-                f"<div style='margin-top:6px; color:#cdd5e0;'>{html.escape(str(a['message']))}</div>"
-                f"<div style='margin-top:8px; font-size:0.8rem; color:#5c7a9e;'>"
+                f"<div style='margin-top:6px; color:#4a5568;'>{html.escape(str(a['message']))}</div>"
+                f"<div style='margin-top:8px; font-size:0.8rem; color:#718096;'>"
                 f"🕐 {a['time']}  |  Case: {a['case_id']}  |  ID: {a['id']}"
                 f"</div></div>",
                 unsafe_allow_html=True,
@@ -1333,7 +1412,7 @@ def page_alerts():
                             alert["read"] = True
                     st.rerun()
             else:
-                st.markdown("<small style='color:#5c7a9e;'>✓ Read</small>", unsafe_allow_html=True)
+                st.markdown("<small style='color:#718096;'>✓ Read</small>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: AUDIT TRAIL

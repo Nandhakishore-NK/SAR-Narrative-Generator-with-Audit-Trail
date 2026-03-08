@@ -343,7 +343,7 @@ def _parse_sar_output(raw: str, case_id: str) -> dict:
     }
 
 def generate_sar(case, transactions, rule_triggers, api_key, provider):
-    from langchain.schema import SystemMessage, HumanMessage
+    from langchain_core.messages import SystemMessage, HumanMessage
     llm = _get_llm_client(api_key, provider)
     if llm is None:
         raise RuntimeError("Could not initialise LLM client — check API key.")
